@@ -1,0 +1,7 @@
+build/
+flattened/
+node_modules/
+.env
+.env.rinkeby
+.env.kovan
+*.DS_Store
