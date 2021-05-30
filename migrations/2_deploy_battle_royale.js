@@ -19,12 +19,12 @@ module.exports = async (deployer, network, addresses) => {
   try {
     // await deployer.deploy(BattleRoyaleFactory, {gas: 10000000});
 
-    await deployer.deploy(BattleRoyaleArena,
-      VRF_COORDINATOR,
-      LINKTOKEN,
-      KEYHASH,
-      {gas: 10000000}
-    );
+    // await deployer.deploy(BattleRoyaleArena,
+    //   VRF_COORDINATOR,
+    //   LINKTOKEN,
+    //   KEYHASH,
+    //   {gas: 10000000}
+    // );
     const arena = await BattleRoyaleArena.deployed();
     /**
      * BattleRoyale
@@ -46,7 +46,7 @@ module.exports = async (deployer, network, addresses) => {
       4,
       true,
       false,
-      arena.address,
+      ARENA_CONTRACT_ADDRESS,
       {gas: 10000000}
     );
 

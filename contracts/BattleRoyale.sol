@@ -48,8 +48,7 @@ contract BattleRoyale is ERC721Tradable {
   bool public autoPayout;
   // Address of the artist
   address payable public artist;
-  // Address of the artist
-  address payable public arenaContract;
+  address payable public delegate;
   // Set rate
   uint256 public feeRate;
 
@@ -64,7 +63,7 @@ contract BattleRoyale is ERC721Tradable {
     uint256 _supply,
     bool _autoStart,
     bool _autoPayout,
-    address payable _arenaContract
+    address payable _delegate
   )
   public ERC721Tradable(
     _name,
@@ -78,7 +77,7 @@ contract BattleRoyale is ERC721Tradable {
     maxSupply = _supply;
     autoStart = _autoStart;
     autoPayout = _autoPayout;
-    arenaContract = _arenaContract;
+    delegate = _delegate;
   }
   /*
    * Mint NFTs
@@ -129,11 +128,11 @@ contract BattleRoyale is ERC721Tradable {
    * Method to withdraw ETH
    */
    function withdraw(uint256 amount) external override virtual {
-     require(msg.sender == arenaContract || msg.sender == owner());
+     require(msg.sender == delegate || msg.sender == owner());
      uint256 balance = address(this).balance;
      require(amount <= balance);
-     if (arenaContract != address(0)) {
-       payable(arenaContract).transfer(amount);
+     if (delegate != address(0)) {
+       payable(delegate).transfer(amount);
      } else {
        msg.sender.transfer(amount);
      }
@@ -142,7 +141,7 @@ contract BattleRoyale is ERC721Tradable {
   * Get Current ETH Balance from contract
   */
   function getCurrentBalance() external override returns (uint256) {
-    require(msg.sender == arenaContract || msg.sender == owner());
+    require(msg.sender == delegate || msg.sender == owner());
     uint256 balance = address(this).balance;
     return balance;
   }
@@ -169,7 +168,7 @@ contract BattleRoyale is ERC721Tradable {
    * @param {[type]} uint256 [description]
    */
   function setIntervalTime(uint256 _intervalTime) external payable returns (uint256) {
-    require(msg.sender == arenaContract || msg.sender == owner());
+    require(msg.sender == delegate || msg.sender == owner());
     intervalTime = _intervalTime;
   }
   /*
@@ -188,42 +187,42 @@ contract BattleRoyale is ERC721Tradable {
    * set currentPrice
    */
   function setPrice(uint256 _price) external payable {
-    require(msg.sender == arenaContract || msg.sender == owner());
+    require(msg.sender == delegate || msg.sender == owner());
     price = _price;
   }
   /*
    * Toggle auto-start on or off
    */
   function autoStartOn(bool _autoStart) external payable {
-    require(msg.sender == arenaContract || msg.sender == owner());
+    require(msg.sender == delegate || msg.sender == owner());
     autoStart = _autoStart;
   }
   /*
    * Toggle auto-start on or off
    */
   function autoPayoutOn(bool _autoPayout) external payable {
-    require(msg.sender == arenaContract || msg.sender == owner());
+    require(msg.sender == delegate || msg.sender == owner());
     autoPayout = _autoPayout;
   }
   /*
    * Set Fee Rate - aggreed rate the contract takes from the artist for initial sale
    */
   function setFeeRate(uint256 _feeRate) external payable {
-    require(msg.sender == arenaContract || msg.sender == owner());
+    require(msg.sender == delegate || msg.sender == owner());
     feeRate = _feeRate;
   }
   /*
    * setUnitsPerTransaction
    */
   function setUnitsPerTransaction(uint256 _units) external payable {
-    require(msg.sender == arenaContract || msg.sender == owner());
+    require(msg.sender == delegate || msg.sender == owner());
     unitsPerTransaction = _units;
   }
   /*
    * setMaxSupply
    */
   function setMaxSupply(uint256 supply) external payable {
-    require(msg.sender == arenaContract || msg.sender == owner());
+    require(msg.sender == delegate || msg.sender == owner());
     maxSupply = supply;
   }
   /*
@@ -232,7 +231,7 @@ contract BattleRoyale is ERC721Tradable {
    * @param string IPFS meta-data uri
    */
   function setDefaultTokenURI(string memory _tokenUri) external payable {
-    require(msg.sender == arenaContract || msg.sender == owner());
+    require(msg.sender == delegate || msg.sender == owner());
     defaultTokenURI = _tokenUri;
   }
   /*
@@ -241,21 +240,21 @@ contract BattleRoyale is ERC721Tradable {
    * @param string IPFS meta-data uri
    */
   function setPrizeTokenURI(string memory _tokenUri) external payable {
-    require(msg.sender == arenaContract || msg.sender == owner());
+    require(msg.sender == delegate || msg.sender == owner());
     prizeTokenURI = _tokenUri;
   }
   /*
    * set artist
    */
   function setArtist(address payable _artist) external payable {
-    require(msg.sender == arenaContract || msg.sender == owner());
+    require(msg.sender == delegate || msg.sender == owner());
     artist = _artist;
   }
   /*
    * Delegate notifier method
    */
   function notifyGameEnded() internal {
-    BattleRoyaleArena arena = BattleRoyaleArena(payable(arenaContract));
+    BattleRoyaleArena arena = BattleRoyaleArena(payable(delegate));
 
     arena.gameDidEnd(address(this));
   }
@@ -285,7 +284,7 @@ contract BattleRoyale is ERC721Tradable {
    * Method to call to begin the game battle
    */
   function beginBattle() external {
-    require(msg.sender == arenaContract || msg.sender == owner());
+    require(msg.sender == delegate || msg.sender == owner());
     startBattle();
   }
 
@@ -300,7 +299,7 @@ contract BattleRoyale is ERC721Tradable {
    * executeRandomElimination trigger elimination using Chainlink VRF
    */
   function executeRandomElimination(uint256 _randomNumber) external payable {
-    require(msg.sender == arenaContract || msg.sender == owner());
+    require(msg.sender == delegate || msg.sender == owner());
     require(battleState == BATTLE_STATE.RUNNING);
     require(inPlay.size() > 1);
 
@@ -339,7 +338,7 @@ contract BattleRoyale is ERC721Tradable {
    * payout artist
    */
   function executePayout() public payable {
-    require(msg.sender == arenaContract || msg.sender == owner());
+    require(msg.sender == delegate || msg.sender == owner());
     executeAutoPayout();
   }
 
@@ -353,6 +352,6 @@ contract BattleRoyale is ERC721Tradable {
     }
 
     balance = address(this).balance;
-    payable(arenaContract).transfer(balance);
+    payable(delegate).transfer(balance);
   }
 }

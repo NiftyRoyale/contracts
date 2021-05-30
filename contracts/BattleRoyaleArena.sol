@@ -30,6 +30,7 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
     keyHash = _keyHash;
     fee = 0.1 * 10**18; // Set to Chainlink fee for network, Rinkeby and Kovan is 0.1 LINK and MAINNET is 2 LINK
 
+    walletAddress = payable(owner());
     _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
   }
   /**
@@ -178,7 +179,7 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
   }
 
   function executeEliminationByQueue() external onlySupport returns(bool) {
-    for (uint i = 0; i < battleQueue.size(); i++) {
+    for (uint i = 0; i < battleQueue.size(); ++i) {
       address payable nftAddress = battleQueue.atIndex(i);
 
       return executeElimination(nftAddress);
