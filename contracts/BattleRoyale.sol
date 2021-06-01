@@ -89,7 +89,7 @@ contract BattleRoyale is ERC721Tradable {
     require(units <= maxSupply - totalSupply());
     require(units > 0 && units <= unitsPerTransaction);
     require(bytes(defaultTokenURI).length > 0);
-    require(msg.value >= ((price * 10**18) * units));
+    require(msg.value >= (price * units));
     require(purchasers.getIndex(msg.sender) < 0, "Only 1 purchase per account.");
     // add buyer address to list
     purchasers.push(msg.sender);
@@ -116,7 +116,7 @@ contract BattleRoyale is ERC721Tradable {
    * @return {[type]}         [description]
    */
   function burn(uint256 _tokenId) public virtual {
-    require(msg.sender == ownerOf(_tokenId) || msg.sender == owner());
+    require(msg.sender == ownerOf(_tokenId) || msg.sender == delegate || msg.sender == owner());
     delete nftRoyales[_tokenId];
     inPlay.remove(_tokenId);
     _burn(_tokenId);

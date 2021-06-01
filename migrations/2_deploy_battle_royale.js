@@ -25,7 +25,7 @@ module.exports = async (deployer, network, addresses) => {
     //   KEYHASH,
     //   {gas: 10000000}
     // );
-    const arena = await BattleRoyaleArena.deployed();
+    // const arena = await BattleRoyaleArena.deployed();
     /**
      * BattleRoyale
      * string memory _name
@@ -36,15 +36,18 @@ module.exports = async (deployer, network, addresses) => {
      * bool _autoStart
      * bool _autoPayout
      * address payable _arenaContract
-     * address payable _owner
      */
+
+    const price = 0.5 * 10**18;
+
+    console.log(price);
     await deployer.deploy(BattleRoyale,
-      'Nifty Royale Internal Main Account Drop',
-      'NRIMAD',
-      2,
-      1,
-      4,
-      true,
+      'Nifty Royale Internal Test',
+      'NRIT20',
+      `${price}`,
+      20,
+      20,
+      false,
       false,
       ARENA_CONTRACT_ADDRESS,
       {gas: 10000000}
