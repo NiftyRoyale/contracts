@@ -29,7 +29,8 @@ async function main() {
     await b.init();
     const price = await b.price();
     const eth = price * 10**18;
-    await b.purchase(1, eth);
+
+    await b.purchase(1, `${eth}`);
     return console.log('purchase complete');
   } catch (e) {
     return console.error(e);

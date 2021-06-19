@@ -17,7 +17,7 @@ contract BattleRoyale is ERC721Tradable {
   // Maximum number of mintable tokens
   uint256 public maxSupply = 0;
   // current purchasable units per transaction
-  uint256 public unitsPerTransaction;
+  bool public gateway;
   // Prize token URI to be set to winner
   string public prizeTokenURI;
   // Prize token URI to be set to winner
@@ -51,7 +51,6 @@ contract BattleRoyale is ERC721Tradable {
   address payable public delegate;
   // Set rate
   uint256 public feeRate;
-
   /*
    * constructor
    */
@@ -59,8 +58,8 @@ contract BattleRoyale is ERC721Tradable {
     string memory _name,
     string memory _symbol,
     uint256 _price,
-    uint256 _units,
     uint256 _supply,
+    bool _gateway,
     bool _autoStart,
     bool _autoPayout,
     address payable _delegate
@@ -73,8 +72,8 @@ contract BattleRoyale is ERC721Tradable {
     battleState = BATTLE_STATE.STANDBY;
     intervalTime = 30;
     price = _price;
-    unitsPerTransaction = _units;
     maxSupply = _supply;
+    gateway = _gateway;
     autoStart = _autoStart;
     autoPayout = _autoPayout;
     delegate = _delegate;
@@ -87,22 +86,19 @@ contract BattleRoyale is ERC721Tradable {
     require(battleState == BATTLE_STATE.STANDBY);
     require(maxSupply > 0 && totalSupply() < maxSupply);
     require(units <= maxSupply - totalSupply());
-    require(units > 0 && units <= unitsPerTransaction);
     require(bytes(defaultTokenURI).length > 0);
     require(msg.value >= (price * units));
-    require(purchasers.getIndex(msg.sender) < 0, "Only 1 purchase per account.");
+    require(gateway && purchasers.getIndex(msg.sender) < 0, "Only 1 purchase per account.");
     // add buyer address to list
     purchasers.push(msg.sender);
 
-    for (uint256 i = 0; i < units; i++) {
-      uint256 tokenId = mintTo(msg.sender);
-      _setTokenURI(tokenId, defaultTokenURI);
-      inPlay.push(tokenId);
-      nftRoyales[tokenId] = NFTRoyale({
-        inPlay: true,
-        placement: 0
-      });
-    }
+    uint256 tokenId = mintTo(msg.sender);
+    _setTokenURI(tokenId, defaultTokenURI);
+    inPlay.push(tokenId);
+    nftRoyales[tokenId] = NFTRoyale({
+      inPlay: true,
+      placement: 0
+    });
 
     // Begin battle if max supply has been reached
     if (maxSupply == totalSupply() && autoStart) {
@@ -212,11 +208,11 @@ contract BattleRoyale is ERC721Tradable {
     feeRate = _feeRate;
   }
   /*
-   * setUnitsPerTransaction
+   * setGatewayTransaction
    */
-  function setUnitsPerTransaction(uint256 _units) external payable {
+  function setGateway(bool _gateway) external payable {
     require(msg.sender == delegate || msg.sender == owner());
-    unitsPerTransaction = _units;
+    gateway = _gateway;
   }
   /*
    * setMaxSupply

@@ -35,7 +35,8 @@ async function main() {
     console.log(`Granting access`);
 
     const addresses = [
-
+      '0x85Df0EFEd48Bb24Cd54E339F67706b76132f651C',
+      '0xb21D08FbAAb4a1BFd2e3a01d3Dc8eB62bb159a54'
     ];
 
     // Aaron: '0x85Df0EFEd48Bb24Cd54E339F67706b76132f651C',
@@ -45,8 +46,8 @@ async function main() {
 
     for (let a of addresses) {
       console.log(`granting access to: ${a}`);
-      // await b.grantAdminAccess(a);
-      await b.grantSupportAccess(a);
+      await b.grantAdminAccess(a);
+      // await b.grantSupportAccess(a);
     }
 
     console.log('Access assignment complete');

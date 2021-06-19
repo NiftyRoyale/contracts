@@ -31,22 +31,21 @@ module.exports = async (deployer, network, addresses) => {
      * string memory _name
      * string memory _symbol
      * uint256 _price
-     * uint256 _units
      * uint256 _supply
+     * bool _gateway
      * bool _autoStart
      * bool _autoPayout
      * address payable _arenaContract
      */
 
-    const price = 0.5 * 10**18;
+    const price = 0.01 * 10**18;
 
-    console.log(price);
     await deployer.deploy(BattleRoyale,
-      'Nifty Royale Internal Test',
-      'NRIT20',
+      'Nifty Royale Testnet Drop 2',
+      'NRTD2',
       `${price}`,
-      20,
-      20,
+      100,
+      true,
       false,
       false,
       ARENA_CONTRACT_ADDRESS,

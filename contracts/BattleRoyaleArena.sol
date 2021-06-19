@@ -243,10 +243,10 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
     battle.setFeeRate(_feeRate);
   }
 
-  function setUnitsPerTransactionOnNFT(address payable _nft,uint256 _units) external onlySupport payable {
+  function setGatewayOnNFT(address payable _nft, bool _gateway) external onlySupport payable {
     BattleRoyale battle = BattleRoyale(_nft);
 
-    battle.setUnitsPerTransaction(_units);
+    battle.setGateway(_gateway);
   }
 
   function setMaxSupplyOnNFT(address payable _nft, uint256 _supply) external onlySupport payable {

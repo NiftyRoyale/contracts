@@ -66,28 +66,28 @@ async function printNFTData(b) {
 
 async function main() {
   try {
-    const a = new BattleRoyaleArena({
-      address: ARENA_CONTRACT_ADDRESS,
-      mnemonic: MNEMONIC,
-      etherscanKey: ETHERSCAN_API_KEY,
-      owner: OWNER_ADDRESS,
-      network: NETWORK,
-      node: isInfura
-        ? "https://" + NETWORK + ".infura.io/v3/" + NODE_API_KEY
-        : "https://eth-" + NETWORK + ".alchemyapi.io/v2/" + NODE_API_KEY,
-    });
-    await a.init();
+    // const a = new BattleRoyaleArena({
+    //   address: ARENA_CONTRACT_ADDRESS,
+    //   mnemonic: MNEMONIC,
+    //   etherscanKey: ETHERSCAN_API_KEY,
+    //   owner: OWNER_ADDRESS,
+    //   network: NETWORK,
+    //   node: isInfura
+    //     ? "https://" + NETWORK + ".infura.io/v3/" + NODE_API_KEY
+    //     : "https://eth-" + NETWORK + ".alchemyapi.io/v2/" + NODE_API_KEY,
+    // });
+    // await a.init();
+    //
+    // const currentLinkBalance = await a.getCurrentLinkBalance();
+    // console.log(`currentLinkBalance: ${currentLinkBalance}`);
+    //
+    // const currentBalance = await a.getCurrentBalance();
+    // console.log(`currentBalance: ${currentBalance}`);
+    //
+    // const battleQueue = await a.getBattleQueue();
+    // console.log(`battleQueue: ${battleQueue}`);
 
-    const currentLinkBalance = await a.getCurrentLinkBalance();
-    console.log(`currentLinkBalance: ${currentLinkBalance}`);
-
-    const currentBalance = await a.getCurrentBalance();
-    console.log(`currentBalance: ${currentBalance}`);
-
-    const battleQueue = await a.getBattleQueue();
-    console.log(`battleQueue: ${battleQueue}`);
-
-    const nfts = battleQueue.map((a) => {
+    const nfts = ['0xAa79A77BaBbDa34d20a013925Cdb8DE0791E1c94'].map((a) => {
       return new BattleRoyale({
         address: a,
         mnemonic: MNEMONIC,

@@ -47,7 +47,7 @@ module.exports = {
       skipDryRun: true
     },
     rinkeby: {
-      provider: function () {
+      provider: () => {
         return new HDWalletProvider(MNEMONIC, rinkebyNodeUrl);
       },
       gas: 5000000,
@@ -56,7 +56,7 @@ module.exports = {
     },
     live: {
       network_id: 1,
-      provider: function () {
+      provider: () => {
         return new HDWalletProvider(MNEMONIC, mainnetNodeUrl);
       },
       gas: 5000000,

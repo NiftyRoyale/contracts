@@ -1,11 +1,10 @@
 require('dotenv').config();
 const {
-  BattleRoyaleArena,
-  BattleRoyale
+  BattleRoyale,
+  BattleRoyaleArena
 } = require('./contracts');
 const {
   NFT_ADDRESS,
-  ARENA_CONTRACT_ADDRESS,
   ETHERSCAN_API_KEY,
   NETWORK,
   INFURA_KEY,
@@ -13,17 +12,16 @@ const {
   MNEMONIC,
   OWNER_ADDRESS,
   BASIC_NFT_META_DATA,
-  UPGRADE_NFT_META_DATA
+  UPGRADE_NFT_META_DATA,
+  ARENA_CONTRACT_ADDRESS
 } = process.env;
 const NODE_API_KEY = INFURA_KEY || ALCHEMY_KEY;
 const isInfura = !!INFURA_KEY;
 
-const newOwner = '0x453e23826f0CfF7655b6A7e866123013923Ae818';
-
 async function main() {
   try {
-    let b = new BattleRoyaleArena({
-      address: ARENA_CONTRACT_ADDRESS,
+    const b = new BattleRoyale({
+      address: '0xB46747f1633E9BEf69913A0d2ceA2d4815409ee1',
       mnemonic: MNEMONIC,
       etherscanKey: ETHERSCAN_API_KEY,
       owner: OWNER_ADDRESS,
@@ -33,11 +31,12 @@ async function main() {
         : "https://eth-" + NETWORK + ".alchemyapi.io/v2/" + NODE_API_KEY,
     });
     await b.init();
-
-    console.log(`Beginning ownership transfer of ${ARENA_CONTRACT_ADDRESS} to ${newOwner}`);
-    await b.transferOwnership(newOwner);
-
-    return console.log('Transfer complete');
+    const address = '0x85Df0EFEd48Bb24Cd54E339F67706b76132f651C';
+    let id = await b.contract
+      .methods
+      .ownerOf('11')
+      .call();
+    console.log(`token ID: ${id}`);
   } catch (e) {
     return console.error(e);
   }
