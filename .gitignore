@@ -1,6 +1,8 @@
 build/
 flattened/
 node_modules/
+artifacts/
+cache/
 .env
 .env.rinkeby
 .env.kovan
