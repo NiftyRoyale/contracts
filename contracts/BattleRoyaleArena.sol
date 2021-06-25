@@ -28,7 +28,7 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
   public VRFConsumerBase(_vrfCoordinator, _linkToken)
   {
     keyHash = _keyHash;
-    fee = 0.1 * 10**18; // Set to Chainlink fee for network, Rinkeby and Kovan is 0.1 LINK and MAINNET is 2 LINK
+    fee = 2 * 10**18; // Set to Chainlink fee for network, Rinkeby and Kovan is 0.1 LINK and MAINNET is 2 LINK
 
     walletAddress = payable(owner());
     _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
@@ -157,8 +157,7 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
     require(battle.getBattleStateInt() == 1);
     require(battle.getInPlaySize() > 1);
 
-    uint256 seed = uint256(keccak256(abi.encode(1, blockhash(block.number))));
-    bytes32 requestId = requestRandomness(keyHash, fee, seed);
+    bytes32 requestId = requestRandomness(keyHash, fee);
     requestToBattle[requestId] = _nftAddress;
 
     return requestId;
