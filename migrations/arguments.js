@@ -20,7 +20,7 @@ const { ARENA_CONTRACT_ADDRESS } = process.env;
 const price = 0.5 * 10**18;
 
 module.exports = [
-  'Nifty Royale Testing',
+  'Nifty Royale Testing Burn',
   'NRT',
   `${price}`,
   2,

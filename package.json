@@ -14,8 +14,9 @@
     "migrate:dev": "npx truffle migrate --reset --all --network cldev",
     "migrate:kovan": "npx truffle migrate --network kovan",
     "deploy:dev": "npx truffle deploy --reset --all --network cldev",
-    "deploy:rinkeby": "npx truffle deploy --reset --all --network rinkeby",
-    "deploy:kovan": "npx truffle deploy --reset --all --network kovan",
+    "deploy:rinkeby": "npx hardhat run migrations/hardhat.deploy.js --network rinkeby",
+    "deploy:kovan": "npx hardhat run migrations/hardhat.deploy.js --network kovan",
+    "deploy:mainnet": "npx hardhat run migrations/hardhat.deploy.js --network mainnet",
     "test": "npx truffle test",
     "mint": "node scripts/mint.js"
   },

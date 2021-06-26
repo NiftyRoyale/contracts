@@ -318,7 +318,11 @@ contract BattleRoyale is ERC721Tradable {
       royale.inPlay = false;
       royale.placement = inPlay.size();
       tokenId = inPlay.atIndex(0);
-      _setTokenURI(tokenId, prizeTokenURI);
+
+      address winner = ownerOf(tokenId);
+      _burn(tokenId);
+      uint256 prizeTokenId = mintTo(winner);
+      _setTokenURI(prizeTokenId, prizeTokenURI);
       notifyGameEnded();
 
       if (autoPayout) {
