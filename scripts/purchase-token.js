@@ -28,8 +28,8 @@ async function main() {
     });
     await b.init();
     const price = await b.price();
-    const eth = price * 10**18;
-    await b.purchase(1, eth);
+    const quantity = 2;
+    await b.purchase(quantity, `${price * quantity}`);
     return console.log('purchase complete');
   } catch (e) {
     return console.error(e);
