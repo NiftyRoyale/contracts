@@ -1,6 +1,7 @@
 require('dotenv').config();
 const { ethers } = require("hardhat");
-const arguments = require('./arguments');
+const BRArguments = require('./ba-arguments');
+const BRAArguments = require('./baa-arguments');
 /**
  * ChainLink parameters
  * @type {[type]}
@@ -25,17 +26,16 @@ const main = async () => {
     console.log("Account balance:", (await deployer.getBalance()).toString());
 
     const BattleRoyale = await ethers.getContractFactory("BattleRoyale");
-    const BattleRoyaleArena = await ethers.getContractFactory("BattleRoyaleArena");
-
+    // const BattleRoyaleArena = await ethers.getContractFactory("BattleRoyaleArena");
+    //
     // const arena = await BattleRoyaleArena.deploy(
-    //   VRF_COORDINATOR,
-    //   LINKTOKEN,
-    //   KEYHASH
+    //   ...BRAArguments
     // );
     // await arena.deployed();
+    // console.log(`Arena deployed to ${arena.address}`);
 
     const battleRoyale = await BattleRoyale.deploy(
-      ...arguments
+      ...BRArguments
     );
 
     await battleRoyale.deployed();

@@ -23,12 +23,13 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
   constructor(
     address _vrfCoordinator,
     address _linkToken,
-    bytes32 _keyHash
+    bytes32 _keyHash,
+    uint256 _fee
   )
   public VRFConsumerBase(_vrfCoordinator, _linkToken)
   {
     keyHash = _keyHash;
-    fee = 2 * 10**18; // Set to Chainlink fee for network, Rinkeby and Kovan is 0.1 LINK and MAINNET is 2 LINK
+    fee = _fee; // Set to Chainlink fee for network, Rinkeby and Kovan is 0.1 LINK and MAINNET is 2 LINK
 
     walletAddress = payable(owner());
     _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
@@ -141,7 +142,7 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
   /*
    * Perform Upkeep execute random elimination
    */
-  function performUpkeep(bytes calldata performData) external {
+  function performUpkeep(bytes calldata performData) onlySupport external {
     address payable nftAddress = bytesToAddress(performData);
     // Adjust queue
     battleQueue.remove(nftAddress);
