@@ -16,6 +16,7 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
   address payable public walletAddress;
   // temp mapping for battles in random elimination mechanic
   mapping(bytes32 => address payable) requestToBattle;
+  mapping(address => uint8) eliminationState;
 
   // Look into elimination logic and how to maintain state of all NFTs in and out of play
   AddressArray.Addresses battleQueue;
@@ -133,7 +134,8 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
       uint256 intervalTime = battle.intervalTime();
 
       if (battle.getBattleStateInt() == 1
-        && block.timestamp >= timestamp + (intervalTime * 1 minutes)) {
+        && block.timestamp >= timestamp + (intervalTime * 1 minutes)
+        && eliminationState[nftAddress] != 1) {
         return (true, addressToBytes(nftAddress));
       }
     }
@@ -144,9 +146,6 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
    */
   function performUpkeep(bytes calldata performData) onlySupport external {
     address payable nftAddress = bytesToAddress(performData);
-    // Adjust queue
-    battleQueue.remove(nftAddress);
-    battleQueue.push(nftAddress);
     // execute upkeep
     executeBattle(nftAddress);
   }
@@ -158,6 +157,11 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
     require(battle.getBattleStateInt() == 1);
     require(battle.getInPlaySize() > 1);
 
+    eliminationState[_nftAddress] = 1;
+    // Adjust queue
+    battleQueue.remove(_nftAddress);
+    battleQueue.push(_nftAddress);
+
     bytes32 requestId = requestRandomness(keyHash, fee);
     requestToBattle[requestId] = _nftAddress;
 
@@ -168,6 +172,7 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
     address payable nftAddress = requestToBattle[_requestId];
     BattleRoyale battle = BattleRoyale(nftAddress);
     battle.executeRandomElimination(_randomNumber);
+    delete eliminationState[nftAddress];
     delete requestToBattle[_requestId];
   }
   // Delegate callback method called when game has ended
@@ -194,10 +199,8 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
     uint256 intervalTime = battle.intervalTime();
 
     if (battle.getBattleStateInt() == 1
-    && block.timestamp >= timestamp + (intervalTime * 1 minutes)) {
-      // execute upkeep
-      battleQueue.remove(_nftAddress);
-      battleQueue.push(_nftAddress);
+      && block.timestamp >= timestamp + (intervalTime * 1 minutes)
+      && eliminationState[_nftAddress] != 1) {
       executeBattle(_nftAddress);
       return true;
     }
@@ -238,15 +241,22 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
     battle.autoPayoutOn(_autoPayout);
   }
 
-  function setFeeRateOnNFT(address payable _nft, uint256 _feeRate) external onlySupport payable {
-    BattleRoyale battle = BattleRoyale(_nft);
-    battle.setFeeRate(_feeRate);
-  }
-
-  function setUnitsPerTransactionOnNFT(address payable _nft,uint256 _units) external onlySupport payable {
+  function setUnitsPerTransactionOnNFT(address payable _nft, uint256 _units) external onlySupport payable {
     BattleRoyale battle = BattleRoyale(_nft);
 
     battle.setUnitsPerTransaction(_units);
+  }
+
+  function withdrawFromNFT(address payable _nft, uint256 amount) external onlySupport payable {
+    BattleRoyale battle = BattleRoyale(_nft);
+
+    battle.withdraw(amount);
+  }
+
+  function setMaxElimsPerCall(address payable _nft, uint256 _elims) external onlySupport payable {
+    BattleRoyale battle = BattleRoyale(_nft);
+
+    battle.setMaxElimsPerCall(_supply);
   }
 
   function setMaxSupplyOnNFT(address payable _nft, uint256 _supply) external onlySupport payable {
@@ -265,12 +275,6 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
     BattleRoyale battle = BattleRoyale(_nft);
 
     battle.setPrizeTokenURI(_tokenUri);
-  }
-
-  function setArtistOnNFT(address payable _nft, address payable _artist) external onlySupport payable {
-    BattleRoyale battle = BattleRoyale(_nft);
-
-    battle.setArtist(_artist);
   }
 
   function beginBattleOnNFT(address payable _nft) external onlySupport {
