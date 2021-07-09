@@ -8,7 +8,6 @@ import "./CustomAccessControl.sol";
 
 contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
   using AddressArray for AddressArray.Addresses;
-
   // Chainlink properties
   bytes32 internal keyHash;
   uint256 public fee;
@@ -16,8 +15,7 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
   address payable public walletAddress;
   // temp mapping for battles in random elimination mechanic
   mapping(bytes32 => address payable) requestToBattle;
-  mapping(address => uint8) eliminationState;
-
+  mapping(address => bool) eliminationState;
   // Look into elimination logic and how to maintain state of all NFTs in and out of play
   AddressArray.Addresses battleQueue;
 
@@ -81,6 +79,7 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
 
   /* ===== Battle Royale Arena Methods ===== */
   function addToBattleQueue(address payable _nftAddress) external payable onlySupport returns(bool) {
+    eliminationState[_nftAddress] = false;
     return battleQueue.push(_nftAddress);
   }
 
@@ -94,17 +93,12 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
 
   function removeFromQueue(address payable nftAddress) external onlySupport payable returns(address payable[] memory) {
     battleQueue.remove(nftAddress);
+    delete eliminationState[nftAddress];
     return battleQueue.getAll();
   }
 
   function setWalletAddress(address payable _wallet) external onlyOwner payable {
     walletAddress = _wallet;
-  }
-
-  function bytesToAddress(bytes memory bys) internal pure returns (address payable addr) {
-    assembly {
-      addr := mload(add(bys,20))
-    }
   }
   /*
    * addressToBytes
@@ -114,6 +108,17 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
   function addressToBytes(address payable a) internal pure returns (bytes memory b) {
     return abi.encodePacked(a);
   }
+  /*
+   * bytesToAddress
+   * @param  {[type]} bytes [description]
+   * @return {[type]}       [description]
+   */
+  function bytesToAddress(bytes memory bys) internal pure returns (address payable addr) {
+    assembly {
+      addr := mload(add(bys,20))
+    }
+  }
+
   /* ==========================
    * CHAINLINK METHODS
    * ========================== */
@@ -135,7 +140,7 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
 
       if (battle.getBattleStateInt() == 1
         && block.timestamp >= timestamp + (intervalTime * 1 minutes)
-        && eliminationState[nftAddress] != 1) {
+        && eliminationState[nftAddress] == false) {
         return (true, addressToBytes(nftAddress));
       }
     }
@@ -157,7 +162,7 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
     require(battle.getBattleStateInt() == 1);
     require(battle.getInPlaySize() > 1);
 
-    eliminationState[_nftAddress] = 1;
+    eliminationState[_nftAddress] = true;
     // Adjust queue
     battleQueue.remove(_nftAddress);
     battleQueue.push(_nftAddress);
@@ -172,12 +177,13 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
     address payable nftAddress = requestToBattle[_requestId];
     BattleRoyale battle = BattleRoyale(nftAddress);
     battle.executeRandomElimination(_randomNumber);
-    delete eliminationState[nftAddress];
+    eliminationState[nftAddress] = false;
     delete requestToBattle[_requestId];
   }
   // Delegate callback method called when game has ended
   function gameDidEnd(address payable _address) external payable {
     BattleRoyale battle = BattleRoyale(_address);
+    delete eliminationState[_address];
     uint256 balance = battle.getCurrentBalance();
     battle.withdraw(balance);
     battleQueue.remove(_address);
@@ -200,7 +206,7 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
 
     if (battle.getBattleStateInt() == 1
       && block.timestamp >= timestamp + (intervalTime * 1 minutes)
-      && eliminationState[_nftAddress] != 1) {
+      && eliminationState[_nftAddress] == false) {
       executeBattle(_nftAddress);
       return true;
     }
@@ -256,7 +262,7 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
   function setMaxElimsPerCall(address payable _nft, uint256 _elims) external onlySupport payable {
     BattleRoyale battle = BattleRoyale(_nft);
 
-    battle.setMaxElimsPerCall(_supply);
+    battle.setMaxElimsPerCall(_elims);
   }
 
   function setMaxSupplyOnNFT(address payable _nft, uint256 _supply) external onlySupport payable {
