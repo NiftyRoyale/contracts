@@ -47,11 +47,9 @@ contract BattleRoyale is ERC721Tradable {
   // set to true when wanting the game to start automatically once sales hit max supply
   bool public autoPayout;
   // Address of the artist
-  address payable public artist;
   address payable public delegate;
-  // Set rate
-  uint256 public feeRate;
-
+  // initial price per token
+  uint256 public maxElimsPerCall;
   /*
    * constructor
    */
@@ -61,6 +59,7 @@ contract BattleRoyale is ERC721Tradable {
     uint256 _price,
     uint256 _units,
     uint256 _supply,
+    uint256 _maxElimsPerCall,
     bool _autoStart,
     bool _autoPayout,
     address payable _delegate
@@ -77,6 +76,7 @@ contract BattleRoyale is ERC721Tradable {
     maxSupply = _supply;
     autoStart = _autoStart;
     autoPayout = _autoPayout;
+    maxElimsPerCall = _maxElimsPerCall;
     delegate = _delegate;
   }
   /*
@@ -205,13 +205,6 @@ contract BattleRoyale is ERC721Tradable {
     autoPayout = _autoPayout;
   }
   /*
-   * Set Fee Rate - aggreed rate the contract takes from the artist for initial sale
-   */
-  function setFeeRate(uint256 _feeRate) external payable {
-    require(msg.sender == delegate || msg.sender == owner());
-    feeRate = _feeRate;
-  }
-  /*
    * setUnitsPerTransaction
    */
   function setUnitsPerTransaction(uint256 _units) external payable {
@@ -224,6 +217,13 @@ contract BattleRoyale is ERC721Tradable {
   function setMaxSupply(uint256 supply) external payable {
     require(msg.sender == delegate || msg.sender == owner());
     maxSupply = supply;
+  }
+  /*
+   * setMaxElimsPerCall
+   */
+  function setMaxElimsPerCall(uint256 _maxElimsPerCall) external payable {
+    require(msg.sender == delegate || msg.sender == owner());
+    maxElimsPerCall = _maxElimsPerCall;
   }
   /*
    * setdefaultTokenURI method to set the meta-data uri for the winning token to
@@ -242,13 +242,6 @@ contract BattleRoyale is ERC721Tradable {
   function setPrizeTokenURI(string memory _tokenUri) external payable {
     require(msg.sender == delegate || msg.sender == owner());
     prizeTokenURI = _tokenUri;
-  }
-  /*
-   * set artist
-   */
-  function setArtist(address payable _artist) external payable {
-    require(msg.sender == delegate || msg.sender == owner());
-    artist = _artist;
   }
   /*
    * Delegate notifier method
@@ -295,6 +288,16 @@ contract BattleRoyale is ERC721Tradable {
     // Set to current clock
     timestamp = block.timestamp;
   }
+  /**
+   * expand
+   */
+  function expand(uint256 randomValue, uint256 n) public pure returns (uint256[] memory expandedValues) {
+    expandedValues = new uint256[](n);
+    for (uint256 i = 0; i < n; i++) {
+        expandedValues[i] = uint256(keccak256(abi.encode(randomValue, i)));
+    }
+    return expandedValues;
+  }
   /*
    * executeRandomElimination trigger elimination using Chainlink VRF
    */
@@ -302,37 +305,33 @@ contract BattleRoyale is ERC721Tradable {
     require(msg.sender == delegate || msg.sender == owner());
     require(battleState == BATTLE_STATE.RUNNING);
     require(inPlay.size() > 1);
+    uint256[] memory indexes = expand(_randomNumber, maxElimsPerCall);
 
-    uint256 i = _randomNumber % inPlay.size();
-    uint256 tokenId = inPlay.atIndex(i);
-    outOfPlay.push(tokenId);
-    inPlay.remove(tokenId);
-    NFTRoyale storage royale = nftRoyales[tokenId];
-    royale.inPlay = false;
-    royale.placement = inPlay.size() + 1;
-    timestamp = block.timestamp;
-
-    if (inPlay.size() == 1) {
-      battleState = BATTLE_STATE.ENDED;
-      royale = nftRoyales[tokenId];
+    for (uint i = 0; i < maxElimsPerCall; i++) {
+      uint256 index = indexes[i] % inPlay.size();
+      uint256 tokenId = inPlay.atIndex(index);
+      outOfPlay.push(tokenId);
+      inPlay.remove(tokenId);
+      NFTRoyale storage royale = nftRoyales[tokenId];
       royale.inPlay = false;
-      royale.placement = inPlay.size();
-      tokenId = inPlay.atIndex(0);
-      _setTokenURI(tokenId, prizeTokenURI);
-      notifyGameEnded();
+      royale.placement = inPlay.size() + 1;
 
-      if (autoPayout) {
-        executeAutoPayout();
+      if (inPlay.size() == 1) {
+        battleState = BATTLE_STATE.ENDED;
+        royale = nftRoyales[tokenId];
+        royale.inPlay = false;
+        royale.placement = inPlay.size();
+        tokenId = inPlay.atIndex(0);
+        _setTokenURI(tokenId, prizeTokenURI);
+        notifyGameEnded();
+
+        if (autoPayout) {
+          executeAutoPayout();
+        }
+        break;
       }
     }
-  }
-  /*
-   * calculateFee
-   * Uses basis points to calculate fee
-   */
-  function calculateFee(uint amount) internal returns (uint) {
-    require((amount / 1000) * 1000 == amount, 'amount is too small');
-    return amount * feeRate / 10000;
+    timestamp = block.timestamp;
   }
   /*
    * payout artist
@@ -344,14 +343,6 @@ contract BattleRoyale is ERC721Tradable {
 
   function executeAutoPayout() internal {
     uint256 balance = address(this).balance;
-    if (artist != address(0)
-    && (balance / 1000) * 1000 == balance
-    && feeRate > 0) {
-      uint256 payout = balance - calculateFee(balance);
-      artist.transfer(payout);
-    }
-
-    balance = address(this).balance;
     payable(delegate).transfer(balance);
   }
 }

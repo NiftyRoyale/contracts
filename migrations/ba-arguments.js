@@ -12,20 +12,22 @@ const { ARENA_CONTRACT_ADDRESS } = process.env;
  * uint256 _price
  * uint256 _units
  * uint256 _supply
+ * uint256 _maxElimsPerCall
  * bool _autoStart
  * bool _autoPayout
  * address payable _arenaContract
  */
 
-const price = 0.45 * 10**18;
+const price = 0.01 * 10**18;
 
 module.exports = [
-  'Nifty Royale x Lushsux: Sergey “Big Mac” Nazarov',
-  'NRLSBM',
+  'Nifty Royale Test Batch Elim',
+  'NRTBE',
   `${price}`,
   5,
-  100,
-  false,
+  15,
+  5,
+  true,
   false,
   ARENA_CONTRACT_ADDRESS
 ];
