@@ -14,7 +14,7 @@ Nifty Royale is a blockchain based lottery elimination game, where a set number 
 ## Architecture / Components
 Nifty Royale is comprised of 2 contracts deployed on the blockchain and leverages chainlink node features in order to execute the game mechanics. OpenSea is used to request data of the NFTs within an angular web app along with WebJS to interact directly with the BattleRoyale contract. OpenSea or any other 3rd party NFT auction site could be used to run initial sale of the NFTs. IPFS is the off chain data source to store and request the token metadata.
 
-![nifty-royale-architectur](https://s3.amazonaws.com/awe-portfolio-assets/page_60e9adaaeb69f90008869ad0_Full-NiftyRoyale-architecture.jpeg)
+![nifty-royale-architecture](https://s3.amazonaws.com/awe-portfolio-assets/page_60e9adaaeb69f90008869ad0_Full-NiftyRoyale-architecture.jpeg)
 
 - Royale NFT contract: used for minting the NFT tokens
 - BattleRoyale contract: used for calling the Royale contract, keeping track of the state of the game and executing the game mechanics
