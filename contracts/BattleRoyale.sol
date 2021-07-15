@@ -46,11 +46,7 @@ contract BattleRoyale is ERC721Tradable {
   bool public autoStart;
   // set to true when wanting the game to start automatically once sales hit max supply
   bool public autoPayout;
-  // Address of the artist
-  address payable public artist;
   address payable public delegate;
-  // Set rate
-  uint256 public feeRate;
 
   /*
    * constructor
@@ -205,13 +201,6 @@ contract BattleRoyale is ERC721Tradable {
     autoPayout = _autoPayout;
   }
   /*
-   * Set Fee Rate - aggreed rate the contract takes from the artist for initial sale
-   */
-  function setFeeRate(uint256 _feeRate) external payable {
-    require(msg.sender == delegate || msg.sender == owner());
-    feeRate = _feeRate;
-  }
-  /*
    * setUnitsPerTransaction
    */
   function setUnitsPerTransaction(uint256 _units) external payable {
@@ -242,13 +231,6 @@ contract BattleRoyale is ERC721Tradable {
   function setPrizeTokenURI(string memory _tokenUri) external payable {
     require(msg.sender == delegate || msg.sender == owner());
     prizeTokenURI = _tokenUri;
-  }
-  /*
-   * set artist
-   */
-  function setArtist(address payable _artist) external payable {
-    require(msg.sender == delegate || msg.sender == owner());
-    artist = _artist;
   }
   /*
    * Delegate notifier method
@@ -326,17 +308,7 @@ contract BattleRoyale is ERC721Tradable {
       }
     }
   }
-  /*
-   * calculateFee
-   * Uses basis points to calculate fee
-   */
-  function calculateFee(uint amount) internal returns (uint) {
-    require((amount / 1000) * 1000 == amount, 'amount is too small');
-    return amount * feeRate / 10000;
-  }
-  /*
-   * payout artist
-   */
+
   function executePayout() public payable {
     require(msg.sender == delegate || msg.sender == owner());
     executeAutoPayout();
@@ -344,14 +316,6 @@ contract BattleRoyale is ERC721Tradable {
 
   function executeAutoPayout() internal {
     uint256 balance = address(this).balance;
-    if (artist != address(0)
-    && (balance / 1000) * 1000 == balance
-    && feeRate > 0) {
-      uint256 payout = balance - calculateFee(balance);
-      artist.transfer(payout);
-    }
-
-    balance = address(this).balance;
     payable(delegate).transfer(balance);
   }
 }

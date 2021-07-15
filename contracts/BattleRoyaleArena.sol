@@ -238,11 +238,6 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
     battle.autoPayoutOn(_autoPayout);
   }
 
-  function setFeeRateOnNFT(address payable _nft, uint256 _feeRate) external onlySupport payable {
-    BattleRoyale battle = BattleRoyale(_nft);
-    battle.setFeeRate(_feeRate);
-  }
-
   function setUnitsPerTransactionOnNFT(address payable _nft,uint256 _units) external onlySupport payable {
     BattleRoyale battle = BattleRoyale(_nft);
 
@@ -265,12 +260,6 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
     BattleRoyale battle = BattleRoyale(_nft);
 
     battle.setPrizeTokenURI(_tokenUri);
-  }
-
-  function setArtistOnNFT(address payable _nft, address payable _artist) external onlySupport payable {
-    BattleRoyale battle = BattleRoyale(_nft);
-
-    battle.setArtist(_artist);
   }
 
   function beginBattleOnNFT(address payable _nft) external onlySupport {
