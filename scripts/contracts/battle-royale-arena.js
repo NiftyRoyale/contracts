@@ -283,6 +283,16 @@ class BattleRoyaleArena extends Contract {
       .getAllAccessAddresses()
       .call({ from: this.owner });
   }
+
+  executeEliminationByQueue() {
+    if (!this.owner) {
+      return Promise.reject(new Error("Owner is required"));
+    }
+    return this.contract
+      .methods
+      .executeEliminationByQueue()
+      .send({ from: this.owner, gas: 10000000 });
+  }
 }
 
 module.exports = BattleRoyaleArena;

@@ -39,6 +39,16 @@ class BattleRoyale extends Contract {
       .call();
   }
   /**
+   * Get delegate
+   * @return {String}
+   */
+  delegate() {
+    return this.contract
+      .methods
+      .delegate()
+      .call();
+  }
+  /**
    * Get Interval Time
    * @param {[type]} time [description]
    */
@@ -72,20 +82,10 @@ class BattleRoyale extends Contract {
    * return artist address
    * @return {number} ETH price
    */
-  artist() {
+  maxElimsPerCall() {
     return this.contract
       .methods
-      .artist()
-      .call();
-  }
-  /**
-   * return fee rate
-   * @return {number} ETH price
-   */
-  feeRate() {
-    return this.contract
-      .methods
-      .feeRate()
+      .maxElimsPerCall()
       .call();
   }
   /**
@@ -208,13 +208,13 @@ class BattleRoyale extends Contract {
   /**
    * withdraw all ETH from contract - Can only be executed by contract owner
    */
-  withdraw() {
+  withdraw(amount) {
     if (!this.owner) {
       return Promise.reject(new Error("Owner is required"));
     }
     return this.contract
       .methods
-      .withdraw()
+      .withdraw(amount)
       .send({ from: this.owner });
   }
   /**
@@ -290,6 +290,17 @@ class BattleRoyale extends Contract {
     return this.contract
       .methods
       .setMaxSupply(supply)
+      .send({ from: this.owner });
+  }
+
+
+  setMaxElimsPerCall(elims) {
+    if (!this.owner) {
+      return Promise.reject(new Error("Owner is required"));
+    }
+    return this.contract
+      .methods
+      .setMaxElimsPerCall(elims)
       .send({ from: this.owner });
   }
   /**

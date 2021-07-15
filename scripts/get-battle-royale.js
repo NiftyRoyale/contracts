@@ -43,8 +43,7 @@ async function printNFTData(b) {
     nft.totalSupply = await b.totalSupply();
     nft.unitsPerTransaction = await b.unitsPerTransaction();
     nft.prizeTokenURI = await b.prizeTokenURI();
-    nft.artist = await b.artist();
-    nft.feeRate = await b.feeRate();
+    nft.maxElimsPerCall = await b.maxElimsPerCall();
     nft.defaultTokenURI = await b.defaultTokenURI();
     const timestamp = nft.timestamp = await b.timestamp();
     const intervalTime = nft.intervalTime = await b.intervalTime();
@@ -53,6 +52,7 @@ async function printNFTData(b) {
     nft.price = await b.price();
     nft.battleState = await b.battleState();
     nft.ethBalance = await b.getCurrentBalance();
+    nft.delegate = await b.delegate();
 
     const nextElimination = Number(timestamp) + (Number(intervalTime) * 60);
     const date = new Date(nextElimination * 1000); // Convert timestamp to date by multiplying by 1000 and converting to date

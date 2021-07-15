@@ -29,10 +29,10 @@ async function main() {
     });
     await b.init();
 
-    console.log('Removing from queue');
-    await b.removeFromQueue(NFT_ADDRESS);
+    console.log('Adding battle to queue...');
+    await b.addToBattleQueue(NFT_ADDRESS);
 
-    console.log('removal complete');
+    return console.log('Setup complete');
   } catch (e) {
     return console.error(e);
   }
