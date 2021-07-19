@@ -9,13 +9,18 @@ import "./BattleRoyaleArena.sol";
 contract BattleRoyale is ERC721Tradable {
   using AddressArray for AddressArray.Addresses;
   using Uint256Array for Uint256Array.Uint256s;
+
+  event Eliminated(uint256 _tokenID);
+  event BattleState(uint256 _state);
+
   // Structure of token data on chain
   struct NFTRoyale {
     bool inPlay;
     uint256 placement;
+    bool ressurected;
   }
   // Maximum number of mintable tokens
-  uint256 public maxSupply = 0;
+  uint256 public maxSupply = 1;
   // current purchasable units per transaction
   uint256 public unitsPerTransaction;
   // Prize token URI to be set to winner
@@ -96,7 +101,8 @@ contract BattleRoyale is ERC721Tradable {
       inPlay.push(tokenId);
       nftRoyales[tokenId] = NFTRoyale({
         inPlay: true,
-        placement: 0
+        placement: 0,
+        ressurected: false
       });
     }
 
@@ -116,6 +122,16 @@ contract BattleRoyale is ERC721Tradable {
     delete nftRoyales[_tokenId];
     inPlay.remove(_tokenId);
     _burn(_tokenId);
+  }
+
+  function resurrect(uint256 _tokenId) public payable {
+    require(msg.sender == ownerOf(_tokenId));
+
+    inPlay.push(_tokenId);
+    royale = nftRoyales[_tokenId];
+    royale.inPlay = true;
+    royale.placement = 0;
+    royale.ressurected = true;
   }
   /* ==========================
    * BATTLE ROYALE METHODS
