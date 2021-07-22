@@ -4,61 +4,39 @@ pragma solidity >=0.6.0 <0.9.0;
 import "./ERC721Tradable.sol";
 import "./AddressArray.sol";
 import "./Uint256Array.sol";
-import "./BattleRoyaleArena.sol";
 
 contract BattleRoyale is ERC721Tradable {
   using AddressArray for AddressArray.Addresses;
   using Uint256Array for Uint256Array.Uint256s;
-  // Structure of token data on chain
-  struct NFTRoyale {
-    bool inPlay;
-    uint256 placement;
-  }
-  // Maximum number of mintable tokens
-  uint256 public maxSupply = 0;
-  // current purchasable units per transaction
-  uint256 public unitsPerTransaction;
-  // Prize token URI to be set to winner
-  string public prizeTokenURI;
-  // Prize token URI to be set to winner
-  string public defaultTokenURI;
-  //  time in minutes
-  uint256 public intervalTime;
-  // timestamp of last elimination
-  uint256 public timestamp;
-  // initial price per token
-  uint256 public price;
-  // Current game state
-  enum BATTLE_STATE {
-    STANDBY,
-    RUNNING,
-    ENDED
-  }
+
+  enum BATTLE_STATE { STANDBY, RUNNING, ENDED } // Current game state
+
   BATTLE_STATE public battleState;
-  // Look into elimination logic and how to maintain state of all NFTs in and out of play
-  Uint256Array.Uint256s inPlay;
-  Uint256Array.Uint256s outOfPlay;
-  // Array of purchaser addresses
-  AddressArray.Addresses purchasers;
-  // Temp mapping for NFTs awaiting game execution
-  mapping(uint256 => NFTRoyale) public nftRoyales;
-  // set to true when wanting the game to start automatically once sales hit max supply
-  bool public autoStart;
-  // set to true when wanting the game to start automatically once sales hit max supply
-  bool public autoPayout;
-  // Address of the artist
-  address payable public delegate;
-  // initial price per token
-  uint256 public maxElimsPerCall;
-  /*
-   * constructor
-   */
+  Uint256Array.Uint256s inPlay; // All NFTs in play
+  AddressArray.Addresses purchasers; // Purchaser addresses
+
+  event BattleState(uint256 _state);
+  event Elimination(uint256 _tokenId, uint256 _position);
+
+  string public defaultTokenURI; // Prize token URI to be set to winner
+  string public prizeTokenURI; // Prize token URI to be set to winner
+  uint256 public intervalTime; // Time in minutes
+  uint256 public lastEliminationTimestamp; // Timestamp of last elimination
+
+  uint256 public price; // initial price per token
+  uint256 public unitsPerTransaction; // current purchasable units per transaction
+  uint256 public maxSupply; // Maximum number of mintable tokens
+  uint256 public maxElimsPerCall; // Maximum elimination per round
+  bool public autoStart; // set to true when wanting the game to start automatically once sales hit max supply
+  bool public autoPayout; // set to true when wanting the game to start automatically once sales hit max supply
+  address payable public delegate; // Address of the artist
+
   constructor(
     string memory _name,
     string memory _symbol,
     uint256 _price,
-    uint256 _units,
-    uint256 _supply,
+    uint256 _unitsPerTransaction,
+    uint256 _maxSupply,
     uint256 _maxElimsPerCall,
     bool _autoStart,
     bool _autoPayout,
@@ -72,277 +50,148 @@ contract BattleRoyale is ERC721Tradable {
     battleState = BATTLE_STATE.STANDBY;
     intervalTime = 30;
     price = _price;
-    unitsPerTransaction = _units;
-    maxSupply = _supply;
+    unitsPerTransaction = _unitsPerTransaction;
+    maxSupply = _maxSupply;
     autoStart = _autoStart;
     autoPayout = _autoPayout;
     maxElimsPerCall = _maxElimsPerCall;
     delegate = _delegate;
   }
-  /*
-   * Mint NFTs
-   */
-  function purchase(uint256 units) external payable {
-    require(price > 0);
+
+  modifier onlyAdmin {
+    require(msg.sender == delegate || msg.sender == owner());
+    _;
+  }
+
+  function purchase(uint256 units) public payable {
     require(battleState == BATTLE_STATE.STANDBY);
-    require(maxSupply > 0 && totalSupply() < maxSupply);
-    require(units <= maxSupply - totalSupply());
-    require(units > 0 && units <= unitsPerTransaction);
     require(bytes(defaultTokenURI).length > 0);
+    require(price > 0);
     require(msg.value >= (price * units));
-    require(purchasers.getIndex(msg.sender) < 0, "Only 1 purchase per account.");
-    // add buyer address to list
+    require(maxSupply > 0 && inPlay.size() < maxSupply);
+    require(units > 0 && units <= unitsPerTransaction && units <= maxSupply - inPlay.size());
+    require(purchasers.getIndex(msg.sender) == -1, "Only 1 purchase per account.");
+
     purchasers.push(msg.sender);
 
     for (uint256 i = 0; i < units; i++) {
       uint256 tokenId = mintTo(msg.sender);
       _setTokenURI(tokenId, defaultTokenURI);
       inPlay.push(tokenId);
-      nftRoyales[tokenId] = NFTRoyale({
-        inPlay: true,
-        placement: 0
-      });
     }
 
-    // Begin battle if max supply has been reached
-    if (maxSupply == totalSupply() && autoStart) {
+    if (autoStart && maxSupply == inPlay.size()) {
       startBattle();
     }
   }
 
-  /*
-   * Burn method
-   * @param  {[type]} uint256 [description]
-   * @return {[type]}         [description]
-   */
   function burn(uint256 _tokenId) public virtual {
     require(msg.sender == ownerOf(_tokenId) || msg.sender == delegate || msg.sender == owner());
-    delete nftRoyales[_tokenId];
     inPlay.remove(_tokenId);
     _burn(_tokenId);
   }
-  /* ==========================
-   * BATTLE ROYALE METHODS
-   * ========================== */
-  /*
-   * Method to withdraw ETH
-   */
-   function withdraw(uint256 amount) external override virtual {
-     require(msg.sender == delegate || msg.sender == owner());
-     uint256 balance = address(this).balance;
-     require(amount <= balance);
-     if (delegate != address(0)) {
-       payable(delegate).transfer(amount);
-     } else {
-       msg.sender.transfer(amount);
-     }
-   }
-  /*
-  * Get Current ETH Balance from contract
-  */
-  function getCurrentBalance() external override returns (uint256) {
-    require(msg.sender == delegate || msg.sender == owner());
-    uint256 balance = address(this).balance;
-    return balance;
+
+  function withdraw(uint256 amount) external override virtual onlyAdmin {
+    require(amount <= address(this).balance);
+    if (delegate != address(0)) {
+      payable(delegate).transfer(amount);
+    } else {
+      msg.sender.transfer(amount);
+    }
   }
-  /**
-   * get all token IDs In Play
-   * @return {[type]} array of IDs
-   */
-  function getInPlay() external view returns (uint256[] memory) {
+
+  function getPlayersInPlay() public view returns (uint256[] memory) {
     return inPlay.getAll();
   }
 
-  function getInPlaySize() external view returns (uint256) {
+  function getInPlaySize() public view returns (uint256) {
     return inPlay.size();
   }
-  /**
-   * get all token IDs out of Play
-   * @return {[type]} array of IDs
-   */
-  function getOutOfPlay() external view returns (uint256[] memory) {
-    return outOfPlay.getAll();
-  }
-  /*
-   * Set Interval
-   * @param {[type]} uint256 [description]
-   */
-  function setIntervalTime(uint256 _intervalTime) external payable returns (uint256) {
-    require(msg.sender == delegate || msg.sender == owner());
+
+  function setIntervalTime(uint256 _intervalTime) external payable onlyAdmin {
     intervalTime = _intervalTime;
   }
-  /*
-   * isTokenInPlay - check if owner is still in player
-   */
-  function isTokenInPlay(uint256 _tokenId) external view returns (bool) {
-    return nftRoyales[_tokenId].inPlay;
-  }
-  /*
-   * getTokenPlacement
-   */
-  function getTokenPlacement(uint256 _tokenId) external view returns (uint256) {
-    return nftRoyales[_tokenId].placement;
-  }
-  /*
-   * set currentPrice
-   */
-  function setPrice(uint256 _price) external payable {
-    require(msg.sender == delegate || msg.sender == owner());
+
+  function setPrice(uint256 _price) external payable onlyAdmin {
     price = _price;
   }
-  /*
-   * Toggle auto-start on or off
-   */
-  function autoStartOn(bool _autoStart) external payable {
-    require(msg.sender == delegate || msg.sender == owner());
+
+  function setAutoStart(bool _autoStart) external payable onlyAdmin {
     autoStart = _autoStart;
   }
-  /*
-   * Toggle auto-start on or off
-   */
-  function autoPayoutOn(bool _autoPayout) external payable {
-    require(msg.sender == delegate || msg.sender == owner());
+
+  function setAutoPayout(bool _autoPayout) external payable onlyAdmin {
     autoPayout = _autoPayout;
   }
-  /*
-   * setUnitsPerTransaction
-   */
-  function setUnitsPerTransaction(uint256 _units) external payable {
-    require(msg.sender == delegate || msg.sender == owner());
+
+  function setUnitsPerTransaction(uint256 _units) external payable onlyAdmin {
     unitsPerTransaction = _units;
   }
-  /*
-   * setMaxSupply
-   */
-  function setMaxSupply(uint256 supply) external payable {
-    require(msg.sender == delegate || msg.sender == owner());
-    maxSupply = supply;
+
+  function setMaxSupply(uint256 _supply) external payable onlyAdmin {
+    maxSupply = _supply;
   }
-  /*
-   * setMaxElimsPerCall
-   */
-  function setMaxElimsPerCall(uint256 _maxElimsPerCall) external payable {
-    require(msg.sender == delegate || msg.sender == owner());
+
+  function setMaxElimsPerCall(uint256 _maxElimsPerCall) external payable onlyAdmin {
     maxElimsPerCall = _maxElimsPerCall;
   }
-  /*
-   * setdefaultTokenURI method to set the meta-data uri for the winning token to
-   * be set later when game has ended
-   * @param string IPFS meta-data uri
-   */
-  function setDefaultTokenURI(string memory _tokenUri) external payable {
-    require(msg.sender == delegate || msg.sender == owner());
+
+  function setDefaultTokenURI(string memory _tokenUri) external payable onlyAdmin {
     defaultTokenURI = _tokenUri;
   }
-  /*
-   * setPrizeTokenURI method to set the meta-data uri for the winning token to
-   * be set later when game has ended
-   * @param string IPFS meta-data uri
-   */
-  function setPrizeTokenURI(string memory _tokenUri) external payable {
-    require(msg.sender == delegate || msg.sender == owner());
+
+  function setPrizeTokenURI(string memory _tokenUri) external payable onlyAdmin {
     prizeTokenURI = _tokenUri;
   }
-  /*
-   * Delegate notifier method
-   */
-  function notifyGameEnded() internal {
-    BattleRoyaleArena arena = BattleRoyaleArena(payable(delegate));
 
-    arena.gameDidEnd(address(this));
-  }
-  /*
-   * getBattleState
-   * @return current state string of the game to web app
-   */
-  function getBattleState() external view returns (string memory) {
-    if (battleState == BATTLE_STATE.STANDBY) {
-      return 'STANDBY';
-    }
-
-    if (battleState == BATTLE_STATE.RUNNING) {
-      return 'RUNNING';
-    }
-
-    if (battleState == BATTLE_STATE.ENDED) {
-      return 'ENDED';
-    }
-  }
-
-  function getBattleStateInt() external view returns (uint256) {
-    return uint256(battleState);
-  }
-  /*
-   * beginBattle
-   * Method to call to begin the game battle
-   */
-  function beginBattle() external {
-    require(msg.sender == delegate || msg.sender == owner());
+  function executeBattle() external payable onlyAdmin {
+    require(bytes(prizeTokenURI).length > 0 && inPlay.size() > 1);
     startBattle();
   }
 
-  function startBattle() internal {
-    require(bytes(prizeTokenURI).length > 0 && inPlay.size() > 1);
-
-    battleState = BATTLE_STATE.RUNNING;
-    // Set to current clock
-    timestamp = block.timestamp;
-  }
-  /**
-   * expand
-   */
-  function expand(uint256 randomValue, uint256 n) public pure returns (uint256[] memory expandedValues) {
-    expandedValues = new uint256[](n);
-    for (uint256 i = 0; i < n; i++) {
-        expandedValues[i] = uint256(keccak256(abi.encode(randomValue, i)));
-    }
-    return expandedValues;
-  }
-  /*
-   * executeRandomElimination trigger elimination using Chainlink VRF
-   */
-  function executeRandomElimination(uint256 _randomNumber) external payable {
-    require(msg.sender == delegate || msg.sender == owner());
-    require(battleState == BATTLE_STATE.RUNNING);
-    require(inPlay.size() > 1);
+  function executeRandomElimination(uint256 _randomNumber) external payable onlyAdmin {
+    require(battleState == BATTLE_STATE.RUNNING && inPlay.size() > 1);
     uint256[] memory indexes = expand(_randomNumber, maxElimsPerCall);
 
     for (uint i = 0; i < maxElimsPerCall; i++) {
       uint256 index = indexes[i] % inPlay.size();
       uint256 tokenId = inPlay.atIndex(index);
-      outOfPlay.push(tokenId);
+      uint256 position = inPlay.size() + 1;
       inPlay.remove(tokenId);
-      NFTRoyale storage royale = nftRoyales[tokenId];
-      royale.inPlay = false;
-      royale.placement = inPlay.size() + 1;
+      Elimination(tokenId, position);
 
       if (inPlay.size() == 1) {
         battleState = BATTLE_STATE.ENDED;
-        royale = nftRoyales[tokenId];
-        royale.inPlay = false;
-        royale.placement = inPlay.size();
-        tokenId = inPlay.atIndex(0);
-        _setTokenURI(tokenId, prizeTokenURI);
-        notifyGameEnded();
+        BattleState(battleState);
+        winnerTokenId = inPlay.atIndex(0);
+        _setTokenURI(winnerTokenId, prizeTokenURI);
 
         if (autoPayout) {
-          executeAutoPayout();
+          this.executePayout();
         }
+
         break;
       }
     }
-    timestamp = block.timestamp;
-  }
-  /*
-   * payout artist
-   */
-  function executePayout() public payable {
-    require(msg.sender == delegate || msg.sender == owner());
-    executeAutoPayout();
+
+    lastEliminationTimestamp = block.timestamp;
   }
 
-  function executeAutoPayout() internal {
-    uint256 balance = address(this).balance;
-    payable(delegate).transfer(balance);
+  function executePayout() external payable onlyAdmin {
+    payable(delegate).transfer(address(this).balance);
+  }
+
+  function startBattle() private payable {
+    battleState = BATTLE_STATE.RUNNING;
+    lastEliminationTimestamp = block.timestamp;
+    BattleState(battleState);
+  }
+
+  function expand(uint256 randomValue, uint256 n) private pure returns (uint256[] memory expandedValues) {
+    expandedValues = new uint256[](n);
+    for (uint256 i = 0; i < n; i++) {
+      expandedValues[i] = uint256(keccak256(abi.encode(randomValue, i)));
+    }
+    return expandedValues;
   }
 }

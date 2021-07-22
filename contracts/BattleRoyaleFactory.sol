@@ -34,7 +34,6 @@ contract BattleRoyaleFactory is Ownable {
       _autoPayout,
       arenaContract
     );
-
     BattleRoyaleArena arena = BattleRoyaleArena(arenaContract);
     arena.addToBattleQueue(address(royale));
   }
