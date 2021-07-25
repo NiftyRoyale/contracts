@@ -11,13 +11,12 @@ contract BattleRoyale is ERC721Tradable {
   using Uint256Array for Uint256Array.Uint256s;
 
   event Eliminated(uint256 _tokenID);
-  event Ressurected(uint256 _tokenID);
   event BattleState(uint256 _state);
 
   // Structure of token data on chain
   struct NFTRoyale {
     bool inPlay;
-    bool ressurected;
+    uint256 placement;
   }
   // Maximum number of mintable tokens
   uint256 public maxSupply = 1;
@@ -52,6 +51,7 @@ contract BattleRoyale is ERC721Tradable {
   // set to true when wanting the game to start automatically once sales hit max supply
   bool public autoPayout;
   address payable public delegate;
+
   /*
    * constructor
    */
@@ -100,7 +100,7 @@ contract BattleRoyale is ERC721Tradable {
       inPlay.push(tokenId);
       nftRoyales[tokenId] = NFTRoyale({
         inPlay: true,
-        ressurected: false
+        placement: 0
       });
     }
 
@@ -121,19 +121,6 @@ contract BattleRoyale is ERC721Tradable {
     inPlay.remove(_tokenId);
     _burn(_tokenId);
   }
-
-  function resurrect(uint256 _tokenId) public payable {
-    require(msg.sender == ownerOf(_tokenId));
-
-    NFTRoyale memory royale = nftRoyales[_tokenId];
-    require(royale.ressurected == false);
-    royale.inPlay = true;
-    royale.ressurected = true;
-    Ressurected(_tokenId);
-    inPlay.push(_tokenId);
-    outOfPlay.remove(_tokenId);
-  }
-
   /* ==========================
    * BATTLE ROYALE METHODS
    * ========================== */
@@ -194,12 +181,7 @@ contract BattleRoyale is ERC721Tradable {
    * getTokenPlacement
    */
   function getTokenPlacement(uint256 _tokenId) external view returns (uint256) {
-    int256 index = outOfPlay.getIndex(_tokenId);
-
-    if (index > -1) {
-      return totalSupply() - uint256(index);
-    }
-    return 0;
+    return nftRoyales[_tokenId].placement;
   }
   /*
    * set currentPrice
@@ -314,14 +296,16 @@ contract BattleRoyale is ERC721Tradable {
     inPlay.remove(tokenId);
     NFTRoyale storage royale = nftRoyales[tokenId];
     royale.inPlay = false;
+    royale.placement = inPlay.size() + 1;
     timestamp = block.timestamp;
-    Eliminated(tokenId);
+    Eliminated(tokenID);
 
     if (inPlay.size() == 1) {
       battleState = BATTLE_STATE.ENDED;
       BattleState(uint256(battleState));
       royale = nftRoyales[tokenId];
       royale.inPlay = false;
+      royale.placement = inPlay.size();
       tokenId = inPlay.atIndex(0);
       _setTokenURI(tokenId, prizeTokenURI);
       notifyGameEnded();
