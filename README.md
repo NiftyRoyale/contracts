@@ -9,7 +9,7 @@
 <br/>
 
 ## Description
-Nifty Royale is a blockchain based lottery elimination game, where a set number of NFT art tokens are minted to be auctioned off. Once all have been auctioned off, the game can then begin where a single token is eliminated at random from being in play over a period of time. This elimination repeats over and over again until there is only 1 token left in play and the battle is concluded. Once the game is over, the remaining token will then be rewarded with an upgrade and that token has now become a unique one of it's kind.
+Nifty Royale is a blockchain based battle royale elimination game, where a set number of NFT art tokens are minted to be auctioned off. Once all have been auctioned off, the game can then begin where a single token is eliminated at random from being in play over a period of time. This elimination repeats over and over again until there is only 1 token left in play and the battle is concluded. Once the game is over, the remaining token will then be rewarded with an upgrade and that token has now become a unique one of it's kind.
 
 ## Architecture / Components
 Nifty Royale is comprised of 2 contracts deployed on the blockchain and leverages chainlink node features in order to execute the game mechanics. OpenSea is used to request data of the NFTs within an angular web app along with WebJS to interact directly with the BattleRoyale contract. OpenSea or any other 3rd party NFT auction site could be used to run initial sale of the NFTs. IPFS is the off chain data source to store and request the token metadata.
