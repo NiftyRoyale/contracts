@@ -28,15 +28,14 @@ async function main() {
         : "https://eth-" + NETWORK + ".alchemyapi.io/v2/" + NODE_API_KEY,
     });
     await b.init();
+    await Promise.all([
+      '0x7eC17BeFBfc0456252515Ed2184a42369Ad90DdE'
+    ].map(c => {
+      console.log(`removing: ${c} from queue`);
+      return b.removeFromQueue(c)
+    }));
 
-    console.log('Removing from queue');
-    await b.removeFromQueue(NFT_ADDRESS);
-
-    console.log('removal complete');
-    // console.log('Adding battle to queue...');
-    // await b.addToBattleQueue(NFT_ADDRESS);
-
-    return console.log('Setup complete');
+    return console.log('removal complete');
   } catch (e) {
     return console.error(e);
   }

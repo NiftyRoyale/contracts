@@ -33,32 +33,33 @@ const timeConverter = (a) => {
 
 async function printNFTData(b) {
   try {
-    const nft = {};
+    const n = {};
     console.log('Initializing BattleRoyale...');
     await b.init();
-    nft.address = b.address;
-    nft.name = await b.name();
-    nft.symbol = await b.symbol();
-    nft.maxSupply = await b.maxSupply();
-    nft.totalSupply = await b.totalSupply();
-    nft.unitsPerTransaction = await b.unitsPerTransaction();
-    nft.prizeTokenURI = await b.prizeTokenURI();
-    nft.artist = await b.artist();
-    nft.feeRate = await b.feeRate();
-    nft.defaultTokenURI = await b.defaultTokenURI();
-    const timestamp = nft.timestamp = await b.timestamp();
-    const intervalTime = nft.intervalTime = await b.intervalTime();
-    nft.inPlay = await b.getInPlay();
-    nft.outOfPlay = await b.getOutOfPlay();
-    nft.price = await b.price();
-    nft.battleState = await b.battleState();
-    nft.ethBalance = await b.getCurrentBalance();
-
+    const intervalTime = await b.intervalTime();
+    n.address = b.address;
+    n.name = await b.name();
+    n.currentBalance = await b.getCurrentBalance();
+    n.symbol = await b.symbol();
+    n.inPlay = await b.getInPlay();
+    n.outOfPlay = await b.getOutOfPlay();
+    n.battleState = await b.getBattleState();
+    const timestamp = n.timestamp = await b.timestamp();
     const nextElimination = Number(timestamp) + (Number(intervalTime) * 60);
-    const date = new Date(nextElimination * 1000); // Convert timestamp to date by multiplying by 1000 and converting to date
-    nft.nextElimination = timeConverter(date);
+    n.nextElimination =  new Date(nextElimination * 1000);
+    n.totalSupply = await b.totalSupply();
+    n.maxSupply = await b.maxSupply();
+    n.defaultTokenURI = await b.defaultTokenURI();
+    n.prizeTokenURI = await b.prizeTokenURI();
+    n.price = await b.price();
+    n.unitsPerTransaction = await b.unitsPerTransaction();
+    // n.maxElimsPerCall = await b.maxElimsPerCall();
+    n.intervalTime = intervalTime;
 
-    console.log(nft);
+    const date = new Date(nextElimination * 1000); // Convert timestamp to date by multiplying by 1000 and converting to date
+    n.nextElimination = timeConverter(date);
+
+    console.log(n);
   } catch (e) {
     console.error(e);
   }

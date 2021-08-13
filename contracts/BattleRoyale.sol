@@ -85,23 +85,35 @@ contract BattleRoyale is ERC721Tradable {
   function purchase(uint256 units) external payable {
     require(price > 0);
     require(battleState == BATTLE_STATE.STANDBY);
-    require(maxSupply > 0 && totalSupply() < maxSupply);
-    require(units <= maxSupply - totalSupply());
-    require(units > 0 && units <= unitsPerTransaction);
-    require(bytes(defaultTokenURI).length > 0);
-    require(msg.value >= (price * units));
-    require(purchasers.getIndex(msg.sender) < 0, "Only 1 purchase per account.");
-    // add buyer address to list
-    purchasers.push(msg.sender);
+    if (msg.sender != delegate || msg.sender != owner()) {
+      require(maxSupply > 0 && totalSupply() < maxSupply);
+      require(units <= maxSupply - totalSupply());
+      require(units > 0 && units <= unitsPerTransaction);
+      require(bytes(defaultTokenURI).length > 0);
+      require(msg.value >= (price * units));
+    }
+
+    // require(purchasers.getIndex(msg.sender) < 0, "Only 1 purchase per account.");
+    // // add buyer address to list
+    // purchasers.push(msg.sender);
 
     for (uint256 i = 0; i < units; i++) {
       uint256 tokenId = mintTo(msg.sender);
       _setTokenURI(tokenId, defaultTokenURI);
-      inPlay.push(tokenId);
-      nftRoyales[tokenId] = NFTRoyale({
-        inPlay: true,
-        placement: 0
-      });
+
+      if (msg.sender == delegate || msg.sender == owner()) {
+        outOfPlay.push(tokenId);
+        nftRoyales[tokenId] = NFTRoyale({
+          inPlay: false,
+          placement: inPlay.size() + 1
+        });
+      } else {
+        inPlay.push(tokenId);
+        nftRoyales[tokenId] = NFTRoyale({
+          inPlay: true,
+          placement: 0
+        });
+      }
     }
 
     // Begin battle if max supply has been reached
@@ -298,7 +310,7 @@ contract BattleRoyale is ERC721Tradable {
     royale.inPlay = false;
     royale.placement = inPlay.size() + 1;
     timestamp = block.timestamp;
-    Eliminated(tokenID);
+    Eliminated(tokenId);
 
     if (inPlay.size() == 1) {
       battleState = BATTLE_STATE.ENDED;
