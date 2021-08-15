@@ -161,7 +161,7 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
 
     require(LINK.balanceOf(address(this)) >= fee);
     require(battle.getBattleStateInt() == 1);
-    require(battle.getInPlaySize() > 1);
+    require(battle.getInPlay().length > 1);
 
     eliminationState[_nftAddress] = true;
     // Adjust queue
@@ -227,10 +227,10 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
     return battle.getOutOfPlay();
   }
 
-  function setIntervalTimeOnNFT(address payable _nft, uint256 _intervalTime) external payable onlySupport returns (uint256) {
+  function setIntervalTimeOnNFT(address payable _nft, uint256 _intervalTime) external payable onlySupport {
     BattleRoyale battle = BattleRoyale(_nft);
 
-    return battle.setIntervalTime(_intervalTime);
+    battle.setIntervalTime(_intervalTime);
   }
 
   function setPriceOnNFT(address payable _nft, uint256 _price) external onlySupport payable {
