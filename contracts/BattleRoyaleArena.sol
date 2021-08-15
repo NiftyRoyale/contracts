@@ -161,7 +161,7 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
 
     require(LINK.balanceOf(address(this)) >= fee);
     require(battle.getBattleStateInt() == 1);
-    require(battle.getInPlaySize() > 1);
+    require(battle.getInPlay().length > 1);
 
     eliminationState[_nftAddress] = true;
     // Adjust queue
