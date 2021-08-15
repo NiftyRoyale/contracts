@@ -143,10 +143,6 @@ contract BattleRoyale is ERC721Tradable {
     return outOfPlay.getAll();
   }
 
-  function getInPlaySize() external view returns (uint256) {
-    return inPlay.size();
-  }
-
   function getCurrentBalance() external override onlyAdmin returns (uint256) {
     uint256 balance = address(this).balance;
     return balance;
