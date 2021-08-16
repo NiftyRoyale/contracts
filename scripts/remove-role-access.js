@@ -34,12 +34,12 @@ async function main() {
 
     console.log(`Granting access`);
 
-    const addresses = '';
+    const a = '0x15C1b73f28569d535184aE0435Cba7Bdd7626900';
 
     console.log(`removing access to: ${a}`);
     await b.revokeAccessRole(a);
 
-    console.log('Access grant complete');
+    console.log('Access removal complete');
   } catch (e) {
     return console.error(e);
   }

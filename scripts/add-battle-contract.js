@@ -31,11 +31,11 @@ async function main() {
     await Promise.all([
       '0x65B1Eff322B6D42d975961472C49115F5EDF3C08'
     ].map(c => {
-      console.log(`removing: ${c} from queue`);
-      return b.removeFromQueue(c)
+      console.log(`adding: ${c} to queue`);
+      return b.addToBattleQueue(c)
     }));
 
-    return console.log('removal complete');
+    return console.log('addition complete');
   } catch (e) {
     return console.error(e);
   }

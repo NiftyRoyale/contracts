@@ -190,13 +190,12 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
     battleQueue.remove(_address);
   }
 
-  function executeEliminationByQueue() external onlySupport returns (bool) {
+  function executeEliminationByQueue() external onlySupport {
     for (uint i = 0; i < battleQueue.size(); i++) {
       address payable nftAddress = battleQueue.atIndex(i);
 
-      return executeElimination(nftAddress);
+      executeElimination(nftAddress);
     }
-    return false;
   }
 
   function executeElimination(address payable _nftAddress) public onlySupport returns(bool) {

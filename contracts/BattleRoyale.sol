@@ -78,7 +78,8 @@ contract BattleRoyale is ERC721Tradable {
   function purchase(uint256 units) external payable {
     require(price > 0);
     require(battleState == BATTLE_STATE.STANDBY);
-    if (msg.sender != delegate || msg.sender != owner()) {
+
+    if (msg.sender != delegate && msg.sender != owner()) {
       require(maxSupply > 0 && totalSupply() < maxSupply);
       require(units <= maxSupply - totalSupply());
       require(units > 0 && units <= unitsPerTransaction);
