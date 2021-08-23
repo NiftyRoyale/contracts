@@ -12,12 +12,10 @@ const { ARENA_CONTRACT_ADDRESS } = process.env;
  * uint256 _price
  * uint256 _units
  * uint256 _supply
- * uint256 _maxElimsPerCall
  * bool _autoStart
  * bool _autoPayout
  * address payable _arenaContract
  */
-
 const price = 0.01 * 10**18;
 const lvl = 10;
 
