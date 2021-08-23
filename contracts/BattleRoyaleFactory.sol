@@ -7,7 +7,10 @@ import "./BattleRoyaleArena.sol";
 
 contract BattleRoyaleFactory is Ownable {
   address payable public arenaContract;
-  constructor() public {}
+
+  constructor(address payable _arenaContract) public {
+    arenaContract = _arenaContract;
+  }
 
   function create(
     string memory _name,
@@ -15,13 +18,24 @@ contract BattleRoyaleFactory is Ownable {
     uint256 _price,
     uint256 _units,
     uint256 _supply,
+    uint256 _maxElimsPerCall,
     bool _autoStart,
     bool _autoPayout
   ) external onlyOwner {
     require(arenaContract != address(0));
-    BattleRoyaleArena arena = BattleRoyaleArena(arenaContract);
-    BattleRoyale royale = new BattleRoyale(_name, _symbol, _price, _units, _supply, _autoStart, _autoPayout, arenaContract);
+    BattleRoyale royale = new BattleRoyale(
+      _name,
+      _symbol,
+      _price,
+      _units,
+      _supply,
+      _maxElimsPerCall,
+      _autoStart,
+      _autoPayout,
+      arenaContract
+    );
 
+    BattleRoyaleArena arena = BattleRoyaleArena(arenaContract);
     arena.addToBattleQueue(address(royale));
   }
 

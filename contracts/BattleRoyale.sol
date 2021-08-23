@@ -17,6 +17,7 @@ contract BattleRoyale is ERC721Tradable {
   }
 
   BATTLE_STATE public battleState;
+<<<<<<< HEAD
 
   event Eliminated(uint256 _tokenID);
   event BattleState(uint256 _state);
@@ -39,12 +40,33 @@ contract BattleRoyale is ERC721Tradable {
   Uint256Array.Uint256s inPlay; // look into elimination logic and how to maintain state of all NFTs in and out of play
   Uint256Array.Uint256s outOfPlay;
 
+=======
+  // Look into elimination logic and how to maintain state of all NFTs in and out of play
+  Uint256Array.Uint256s inPlay;
+  Uint256Array.Uint256s outOfPlay;
+  // Array of purchaser addresses
+  AddressArray.Addresses purchasers;
+  // Temp mapping for NFTs awaiting game execution
+  mapping(uint256 => NFTRoyale) public nftRoyales;
+  // set to true when wanting the game to start automatically once sales hit max supply
+  bool public autoStart;
+  // set to true when wanting the game to start automatically once sales hit max supply
+  bool public autoPayout;
+  // Address of the artist
+  address payable public delegate;
+  // initial price per token
+  uint256 public maxElimsPerCall;
+  /*
+   * constructor
+   */
+>>>>>>> main
   constructor(
     string memory _name,
     string memory _symbol,
     uint256 _price,
     uint256 _units,
     uint256 _supply,
+    uint256 _maxElimsPerCall,
     bool _autoStart,
     bool _autoPayout,
     address payable _delegate
@@ -61,6 +83,7 @@ contract BattleRoyale is ERC721Tradable {
     maxSupply = _supply;
     autoStart = _autoStart;
     autoPayout = _autoPayout;
+    maxElimsPerCall = _maxElimsPerCall;
     delegate = _delegate;
   }
 
@@ -194,6 +217,7 @@ contract BattleRoyale is ERC721Tradable {
   function executeRandomElimination(uint256 _randomNumber) external payable onlyAdmin {
     require(battleState == BATTLE_STATE.RUNNING);
     require(inPlay.size() > 1);
+    uint256[] memory indexes = expand(_randomNumber, maxElimsPerCall);
 
     uint256 i = _randomNumber % inPlay.size();
     uint256 tokenId = inPlay.atIndex(i);
@@ -209,8 +233,10 @@ contract BattleRoyale is ERC721Tradable {
       _setTokenURI(tokenId, prizeTokenURI);
       notifyGameEnded();
 
-      if (autoPayout) {
-        executeAutoPayout();
+        if (autoPayout) {
+          executeAutoPayout();
+        }
+        break;
       }
     }
   }
