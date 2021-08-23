@@ -32,9 +32,9 @@ async function main() {
     });
     await b.init();
 
-    console.log(`Granting access`);
+    console.log(`Removing access`);
 
-    const a = '0x15C1b73f28569d535184aE0435Cba7Bdd7626900';
+    const a = '0x75b610a8Cf14a481D25FeC0C929B419BF8aC6862';
 
     console.log(`removing access to: ${a}`);
     await b.revokeAccessRole(a);

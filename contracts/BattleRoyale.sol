@@ -96,6 +96,7 @@ contract BattleRoyale is ERC721Tradable {
       _setTokenURI(tokenId, defaultTokenURI);
 
       if (msg.sender == delegate || msg.sender == owner()) {
+        Eliminated(tokenId);
         outOfPlay.push(tokenId);
       } else {
         inPlay.push(tokenId);
