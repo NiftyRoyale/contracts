@@ -128,6 +128,7 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
    */
   function checkUpkeep(bytes calldata checkData)
   external
+  view
   returns(
     bool upkeepNeeded,
     bytes memory performData
@@ -152,7 +153,9 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
   function performUpkeep(bytes calldata performData) onlySupport external {
     address payable nftAddress = bytesToAddress(performData);
     // execute upkeep
-    executeBattle(nftAddress);
+    if (eliminationState[nftAddress] == false) {
+      executeBattle(nftAddress);
+    }
   }
   /* === Verifiable Random Function === */
   function executeBattle(address payable _nftAddress) internal returns (bytes32) {
@@ -160,7 +163,12 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
 
     require(LINK.balanceOf(address(this)) >= fee);
     require(battle.getBattleStateInt() == 1);
-    require(battle.getInPlaySize() > 1);
+    require(battle.getInPlay().length > 1);
+
+    eliminationState[_nftAddress] = true;
+    // Adjust queue
+    battleQueue.remove(_nftAddress);
+    battleQueue.push(_nftAddress);
 
     eliminationState[_nftAddress] = true;
     // Adjust queue
@@ -189,13 +197,12 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
     battleQueue.remove(_address);
   }
 
-  function executeEliminationByQueue() external onlySupport returns(bool) {
-    for (uint i = 0; i < battleQueue.size(); ++i) {
+  function executeEliminationByQueue() external onlySupport {
+    for (uint i = 0; i < battleQueue.size(); i++) {
       address payable nftAddress = battleQueue.atIndex(i);
 
-      return executeElimination(nftAddress);
+      executeElimination(nftAddress);
     }
-    return false;
   }
 
   function executeElimination(address payable _nftAddress) public onlySupport returns(bool) {
@@ -226,10 +233,10 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
     return battle.getOutOfPlay();
   }
 
-  function setIntervalTimeOnNFT(address payable _nft, uint256 _intervalTime) external payable onlySupport returns (uint256) {
+  function setIntervalTimeOnNFT(address payable _nft, uint256 _intervalTime) external payable onlySupport {
     BattleRoyale battle = BattleRoyale(_nft);
 
-    return battle.setIntervalTime(_intervalTime);
+    battle.setIntervalTime(_intervalTime);
   }
 
   function setPriceOnNFT(address payable _nft, uint256 _price) external onlySupport payable {
@@ -259,11 +266,11 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
     battle.withdraw(amount);
   }
 
-  function setMaxElimsPerCall(address payable _nft, uint256 _elims) external onlySupport payable {
-    BattleRoyale battle = BattleRoyale(_nft);
-
-    battle.setMaxElimsPerCall(_elims);
-  }
+  // function setMaxElimsPerCall(address payable _nft, uint256 _elims) external onlySupport payable {
+  //   BattleRoyale battle = BattleRoyale(_nft);
+  //
+  //   battle.setMaxElimsPerCall(_elims);
+  // }
 
   function setMaxSupplyOnNFT(address payable _nft, uint256 _supply) external onlySupport payable {
     BattleRoyale battle = BattleRoyale(_nft);

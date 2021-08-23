@@ -42,7 +42,7 @@
     "depcheck": "^1.4.2",
     "ethereum-waffle": "^3.4.0",
     "ethers": "^5.4.1",
-    "hardhat": "^2.4.1",
+    "hardhat": "^2.4.3",
     "solhint": "^3.3.6"
   },
   "resolutions": {

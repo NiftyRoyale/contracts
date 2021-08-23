@@ -68,26 +68,13 @@ class BattleRoyale extends Contract {
       .price()
       .call();
   }
-  /**
-   * return artist address
-   * @return {number} ETH price
-   */
-  artist() {
-    return this.contract
-      .methods
-      .artist()
-      .call();
-  }
-  /**
-   * return fee rate
-   * @return {number} ETH price
-   */
-  feeRate() {
-    return this.contract
-      .methods
-      .feeRate()
-      .call();
-  }
+
+  // maxElimsPerCall() {
+  //   return this.contract
+  //     .methods
+  //     .maxElimsPerCall()
+  //     .call();
+  // }
   /**
    * Begin Battle - Method to begin game, can only be called by contract owner
    * @return {[type]} [description]
@@ -174,10 +161,7 @@ class BattleRoyale extends Contract {
     return this.contract
       .methods
       .setIntervalTime(time)
-      .send({
-        from: this.owner,
-        gas: 10000000
-      });
+      .send({ from: this.owner });
   }
   /**
    * Set Default Token URI - Can only be executed by contract owner
@@ -190,6 +174,16 @@ class BattleRoyale extends Contract {
     return this.contract
       .methods
       .setDefaultTokenURI(uri)
+      .send({ from: this.owner });
+  }
+
+  setMaxElimsPerCall(elims) {
+    if (!this.owner) {
+      return Promise.reject(new Error("Owner is required"));
+    }
+    return this.contract
+      .methods
+      .setMaxElimsPerCall(elims)
       .send({ from: this.owner });
   }
   /**
@@ -208,13 +202,13 @@ class BattleRoyale extends Contract {
   /**
    * withdraw all ETH from contract - Can only be executed by contract owner
    */
-  withdraw() {
+  withdraw(amount) {
     if (!this.owner) {
       return Promise.reject(new Error("Owner is required"));
     }
     return this.contract
       .methods
-      .withdraw()
+      .withdraw(amount)
       .send({ from: this.owner });
   }
   /**
@@ -261,9 +255,10 @@ class BattleRoyale extends Contract {
     if (!this.owner) {
       return Promise.reject(new Error("Owner is required"));
     }
+
     return this.contract
       .methods
-      .setPrice(price)
+      .setPrice(`${price * 10**18}`)
       .send({ from: this.owner });
   }
   /**
@@ -306,29 +301,14 @@ class BattleRoyale extends Contract {
       .call({ from: this.owner });
   }
 
-  /**
-   * Get Current Battle State
-   * @return {String} Potential States: STANDBY, RUNNING, ENDED
-   */
-  battleState() {
-    if (!this.owner) {
-      return Promise.reject(new Error("Owner is required"));
-    }
-    return this.contract
-      .methods
-      .battleState()
-      .call({ from: this.owner });
-  }
-
   executeRandomElimination(randomNumber) {
     if (!this.owner) {
       return Promise.reject(new Error("Owner is required"));
     }
-
     return this.contract
       .methods
       .executeRandomElimination(randomNumber)
-      .send({ from: this.owner, gas: 10000000 });
+      .send({ from: this.owner });
   }
 }
 

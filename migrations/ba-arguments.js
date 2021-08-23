@@ -18,16 +18,16 @@ const { ARENA_CONTRACT_ADDRESS } = process.env;
  * address payable _arenaContract
  */
 
-const price = 0.1 * 10**18;
+const price = 0.01 * 10**18;
+const lvl = 10;
 
 module.exports = [
-  'Nifty Royale Test Batch Elim',
-  'NRTBE',
+  `Nifty Royale Demo`,
+  `NRD`,
   `${price}`,
-  5,
-  15,
-  5,
-  true,
+  4,
+  4,
+  false,
   false,
   ARENA_CONTRACT_ADDRESS
 ];
