@@ -35,7 +35,7 @@ async function main() {
     console.log(`Granting access`);
 
     const addresses = [
-      '0x7b3EC232b08BD7b4b3305BE0C044D907B2DF960B'
+      '0x4Cb093f226983713164A62138C3F718A5b595F73'
     ];
 
     // Aaron: '0x85Df0EFEd48Bb24Cd54E339F67706b76132f651C',

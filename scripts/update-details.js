@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { BattleRoyaleArena } = require('./contracts');
+const { BattleRoyale } = require('./contracts');
 const {
   NFT_ADDRESS,
   ARENA_CONTRACT_ADDRESS,
@@ -16,9 +16,11 @@ const NODE_API_KEY = INFURA_KEY || ALCHEMY_KEY;
 const isInfura = !!INFURA_KEY;
 
 async function main() {
+  const address = '0x4D4165C54726c25f7C39F56fefCb1367374fBB87';
+
   try {
-    let b = new BattleRoyaleArena({
-      address: ARENA_CONTRACT_ADDRESS,
+    let b = new BattleRoyale({
+      address: address,
       mnemonic: MNEMONIC,
       etherscanKey: ETHERSCAN_API_KEY,
       owner: OWNER_ADDRESS,
@@ -28,14 +30,15 @@ async function main() {
         : "https://eth-" + NETWORK + ".alchemyapi.io/v2/" + NODE_API_KEY,
     });
     await b.init();
-    await Promise.all([
-      '0x92f77830547C2433bcE139391a91EE72dD1f9947'
-    ].map(c => {
-      console.log(`removing: ${c} from queue`);
-      return b.removeFromQueue(c)
-    }));
 
-    return console.log('removal complete');
+    console.log(`Updating ${address}`);
+
+    // await b.setIntervalTime(10);
+    // await b.setMaxSupply(50);
+
+    await b.setPrice(0.1);
+
+    return console.log('Update complete');
   } catch (e) {
     return console.error(e);
   }

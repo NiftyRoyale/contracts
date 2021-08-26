@@ -170,11 +170,6 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
     battleQueue.remove(_nftAddress);
     battleQueue.push(_nftAddress);
 
-    eliminationState[_nftAddress] = true;
-    // Adjust queue
-    battleQueue.remove(_nftAddress);
-    battleQueue.push(_nftAddress);
-
     bytes32 requestId = requestRandomness(keyHash, fee);
     requestToBattle[requestId] = _nftAddress;
 

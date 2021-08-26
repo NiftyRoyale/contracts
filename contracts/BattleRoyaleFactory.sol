@@ -18,7 +18,6 @@ contract BattleRoyaleFactory is Ownable {
     uint256 _price,
     uint256 _units,
     uint256 _supply,
-    uint256 _maxElimsPerCall,
     bool _autoStart,
     bool _autoPayout
   ) external onlyOwner {
@@ -29,7 +28,6 @@ contract BattleRoyaleFactory is Ownable {
       _price,
       _units,
       _supply,
-      _maxElimsPerCall,
       _autoStart,
       _autoPayout,
       arenaContract
