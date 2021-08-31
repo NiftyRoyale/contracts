@@ -7,12 +7,14 @@ require('dotenv').config();
    VRF_COORDINATOR,
    LINKTOKEN,
    KEYHASH,
-   FEE
+   FEE,
+   MAX_GAS
  } = process.env;
 
 module.exports = [
   VRF_COORDINATOR,
   LINKTOKEN,
   KEYHASH,
-  `${FEE * 10**18}`
+  `${FEE * 10**18}`,
+  `${MAX_GAS * 10**9}`
 ];

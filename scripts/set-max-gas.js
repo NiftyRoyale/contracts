@@ -1,8 +1,10 @@
 require('dotenv').config();
-const { BattleRoyale } = require('./contracts');
+const {
+  BattleRoyale,
+  BattleRoyaleArena
+} = require('./contracts');
 const {
   NFT_ADDRESS,
-  ARENA_CONTRACT_ADDRESS,
   ETHERSCAN_API_KEY,
   NETWORK,
   INFURA_KEY,
@@ -10,17 +12,16 @@ const {
   MNEMONIC,
   OWNER_ADDRESS,
   BASIC_NFT_META_DATA,
-  UPGRADE_NFT_META_DATA
+  UPGRADE_NFT_META_DATA,
+  ARENA_CONTRACT_ADDRESS
 } = process.env;
 const NODE_API_KEY = INFURA_KEY || ALCHEMY_KEY;
 const isInfura = !!INFURA_KEY;
 
 async function main() {
-  const address = '0x2ae6212bC77Fde793c01D4bF8CE042De02c13c18';
-
   try {
-    let b = new BattleRoyale({
-      address: address,
+    const b = new BattleRoyaleArena({
+      address: ARENA_CONTRACT_ADDRESS,
       mnemonic: MNEMONIC,
       etherscanKey: ETHERSCAN_API_KEY,
       owner: OWNER_ADDRESS,
@@ -30,14 +31,10 @@ async function main() {
         : "https://eth-" + NETWORK + ".alchemyapi.io/v2/" + NODE_API_KEY,
     });
     await b.init();
+    const gas = 10;
 
-    // console.log(`Updating ${address}`);
-    //
-    await b.setIntervalTime(5);
-    // await b.setMaxSupply(50);
-    // await b.setUnitsPerTransaction(24);
-
-    return console.log('Update complete');
+    await b.setMaxGas(`${gas * 10**9}`);
+    console.log('complete');
   } catch (e) {
     return console.error(e);
   }

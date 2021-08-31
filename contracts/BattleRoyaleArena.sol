@@ -11,6 +11,8 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
   // Chainlink properties
   bytes32 internal keyHash;
   uint256 public fee;
+  uint256 public maxGas;
+
   // Address of primary wallet
   address payable public walletAddress;
   // temp mapping for battles in random elimination mechanic
@@ -23,12 +25,14 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
     address _vrfCoordinator,
     address _linkToken,
     bytes32 _keyHash,
-    uint256 _fee
+    uint256 _fee,
+    uint256 _maxGas
   )
   public VRFConsumerBase(_vrfCoordinator, _linkToken)
   {
     keyHash = _keyHash;
     fee = _fee; // Set to Chainlink fee for network, Rinkeby and Kovan is 0.1 LINK and MAINNET is 2 LINK
+    maxGas = _maxGas;
 
     walletAddress = payable(owner());
     _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
@@ -119,6 +123,10 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
     }
   }
 
+  function setMaxGas(uint256 _gas) external onlySupport payable {
+    maxGas = _gas;
+  }
+
   /* ==========================
    * CHAINLINK METHODS
    * ========================== */
@@ -133,18 +141,21 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
     bool upkeepNeeded,
     bytes memory performData
   ) {
-    for (uint i = 0; i < battleQueue.size(); i++) {
-      address payable nftAddress = battleQueue.atIndex(i);
-      BattleRoyale battle = BattleRoyale(nftAddress);
-      uint256 timestamp = battle.timestamp();
-      uint256 intervalTime = battle.intervalTime();
+    if (tx.gasprice <= maxGas && LINK.balanceOf(address(this)) >= fee) {
+      for (uint i = 0; i < battleQueue.size(); i++) {
+        address payable nftAddress = battleQueue.atIndex(i);
+        BattleRoyale battle = BattleRoyale(nftAddress);
+        uint256 timestamp = battle.timestamp();
+        uint256 intervalTime = battle.intervalTime();
 
-      if (battle.getBattleStateInt() == 1
-        && block.timestamp >= timestamp + (intervalTime * 1 minutes)
-        && eliminationState[nftAddress] == false) {
-        return (true, addressToBytes(nftAddress));
+        if (battle.getBattleStateInt() == 1
+          && block.timestamp >= timestamp + (intervalTime * 1 minutes)
+          && eliminationState[nftAddress] == false) {
+          return (true, addressToBytes(nftAddress));
+        }
       }
     }
+
     return (false, checkData);
   }
   /*
@@ -153,7 +164,8 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
   function performUpkeep(bytes calldata performData) onlySupport external {
     address payable nftAddress = bytesToAddress(performData);
     // execute upkeep
-    if (eliminationState[nftAddress] == false) {
+    if (tx.gasprice <= maxGas
+      && eliminationState[nftAddress] == false) {
       executeBattle(nftAddress);
     }
   }

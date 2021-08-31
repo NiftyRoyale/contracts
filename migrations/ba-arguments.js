@@ -16,14 +16,14 @@ const { ARENA_CONTRACT_ADDRESS } = process.env;
  * bool _autoPayout
  * address payable _arenaContract
  */
-const price = 0.15 * 10**18;
+const price = 1.1 * 10**18;
 
 module.exports = [
-  `Nifty Royale X Lushsux: ONE DOES NOT SIMPLY SELL AN NFT`,
-  `NRLSODNSSAN`,
+  `Nifty Royale X Surreal Serpentine : True Colours`,
+  `NRSSTC`,
   `${price}`,
   5,
-  97,
+  50,
   false,
   false,
   ARENA_CONTRACT_ADDRESS

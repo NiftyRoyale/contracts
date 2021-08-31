@@ -19,6 +19,13 @@ class BattleRoyaleArena extends Contract {
       .call();
   }
 
+  maxGas() {
+    return this.contract
+      .methods
+      .maxGas()
+      .call();
+  }
+
   withdraw(amount) {
     if (!this.owner) {
       return Promise.reject(new Error("Owner is required"));
@@ -77,13 +84,6 @@ class BattleRoyaleArena extends Contract {
       .methods
       .addToBattleQueue(contract)
       .send({ from: this.owner });
-  }
-
-  getBattleQueueSize() {
-    return this.contract
-      .methods
-      .getBattleQueue()
-      .call();
   }
 
   isContractInQueue(contracts) {
@@ -151,6 +151,17 @@ class BattleRoyaleArena extends Contract {
     return this.contract
       .methods
       .setMaxSupply(contract, supply)
+      .send({ from: this.owner });
+  }
+
+  setMaxGas(gas) {
+    if (!this.owner) {
+      return Promise.reject(new Error("Owner is required"));
+    }
+
+    return this.contract
+      .methods
+      .setMaxGas(gas)
       .send({ from: this.owner });
   }
 

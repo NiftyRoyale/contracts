@@ -88,6 +88,9 @@ async function main() {
     const battleQueue = await a.getBattleQueue();
     console.log(`battleQueue: ${battleQueue}`);
 
+    const maxGas = await a.maxGas();
+    console.log(`Max Gas: ${maxGas}`);
+
     const nfts = battleQueue.map((a) => {
       return new BattleRoyale({
         address: a,

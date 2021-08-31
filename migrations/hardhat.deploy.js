@@ -22,30 +22,36 @@ const main = async () => {
       "Deploying contracts with the account:",
       deployer.address
     );
-    console.log("Account balance:", (await deployer.getBalance()).toString());
+
+    const beginningBalance = (await deployer.getBalance()).toString();
+
+    console.log("Beginning Balance:", beginningBalance);
 
     // const BattleRoyaleFactory = await ethers.getContractFactory("BattleRoyaleFactory");
     // const brf = await BattleRoyaleFactory.deploy();
     // console.log(`BattleRoyaleFactory deployed to ${brf.address}`);
 
-    const BattleRoyaleArena = await ethers.getContractFactory("BattleRoyaleArena");
-    const arena = await BattleRoyaleArena.deploy(
-      ...BRAArguments
-    );
-
-    await arena.deployed();
-    console.log(`Arena deployed to ${arena.address}`);
+    // const BattleRoyaleArena = await ethers.getContractFactory("BattleRoyaleArena");
+    // const arena = await BattleRoyaleArena.deploy(
+    //   ...BRAArguments
+    // );
+    //
+    // await arena.deployed();
+    // console.log(`Arena deployed to ${arena.address}`);
 
     const BattleRoyale = await ethers.getContractFactory("BattleRoyale");
     const battleRoyale = await BattleRoyale.deploy(
-      ...BRArguments,
-      arena.address
+      ...BRArguments
     );
 
     await battleRoyale.deployed();
     console.log(`NFT deployed to ${battleRoyale.address}`);
 
-    return console.log('SUCCESS: Deployment completed');
+    console.log('SUCCESS: Deployment completed');
+
+    const endBalance = (await deployer.getBalance()).toString();
+    console.log("End Balance:", endBalance);
+    return console.log("Total Cost:", (beginningBalance - endBalance));
   } catch (e) {
     console.error(e);
     process.exit(1);
