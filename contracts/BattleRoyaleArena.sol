@@ -153,9 +153,7 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
   function performUpkeep(bytes calldata performData) onlySupport external {
     address payable nftAddress = bytesToAddress(performData);
     // execute upkeep
-    if (eliminationState[nftAddress] == false) {
-      executeBattle(nftAddress);
-    }
+    executeBattle(nftAddress);
   }
   /* === Verifiable Random Function === */
   function executeBattle(address payable _nftAddress) internal returns (bytes32) {
