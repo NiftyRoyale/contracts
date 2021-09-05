@@ -11,17 +11,15 @@ const {
   LINKTOKEN,
   KEYHASH,
   OWNER_ADDRESS,
-  ARENA_CONTRACT_ADDRESS
+  ARENA_CONTRACT_ADDRESS,
+  NETWORK
 } = process.env;
 
 const main = async () => {
   try {
     const [deployer] = await ethers.getSigners();
 
-    console.log(
-      "Deploying contracts with the account:",
-      deployer.address
-    );
+    console.log(`Deploying contracts to ${NETWORK} with the account: ${deployer.address}`);
 
     const beginningBalance = (await deployer.getBalance()).toString();
 

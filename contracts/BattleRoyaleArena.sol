@@ -11,7 +11,7 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
   // Chainlink properties
   bytes32 internal keyHash;
   uint256 public fee;
-  uint256 public maxGas;
+  uint256 public maxGas = 0;
 
   // Address of primary wallet
   address payable public walletAddress;
@@ -141,7 +141,7 @@ contract BattleRoyaleArena is CustomAccessControl, VRFConsumerBase {
     bool upkeepNeeded,
     bytes memory performData
   ) {
-    if (tx.gasprice <= maxGas && LINK.balanceOf(address(this)) >= fee) {
+    if ((maxGas == 0 || tx.gasprice <= maxGas) && LINK.balanceOf(address(this)) >= fee) {
       for (uint i = 0; i < battleQueue.size(); i++) {
         address payable nftAddress = battleQueue.atIndex(i);
         BattleRoyale battle = BattleRoyale(nftAddress);
