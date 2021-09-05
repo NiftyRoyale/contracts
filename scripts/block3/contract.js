@@ -20,12 +20,12 @@ class Contract extends Base {
     this.set('mnemonic', m, String);
   }
 
-  get etherscanKey() {
-    return this.get('etherscanKey');
+  get scanKey() {
+    return this.get('scanKey');
   }
 
-  set etherscanKey(a) {
-    this.set('etherscanKey', a, String);
+  set scanKey(a) {
+    this.set('scanKey', a, String);
   }
 
   get owner() {
@@ -84,7 +84,7 @@ class Contract extends Base {
       if (!this.web3) {
         if (!this.address
           || !this.mnemonic
-          || !this.etherscanKey
+          || !this.scanKey
           || !this.owner
           || !this.node) {
           return reject(new Error("Please set a mnemonic, Alchemy/Infura key, owner, network, and contract address."));
@@ -104,7 +104,7 @@ class Contract extends Base {
     return new Promise(async (resolve, reject) => {
       if (!this.abi) {
         try {
-          const abi = await ABI(this.address, this.etherscanKey, this.network);
+          const abi = await ABI(this.address, this.scanKey, this.network);
 
           this.abi = abi;
           return resolve(this.abi);

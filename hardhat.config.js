@@ -6,7 +6,7 @@ const {
   INFURA_KEY,
   ALCHEMY_KEY,
   PRIVATE_KEY,
-  ETHERSCAN_API_KEY
+  SCAN_API_KEY
 } = process.env;
 const NODE_API_KEY = INFURA_KEY || ALCHEMY_KEY;
 const isInfura = !!INFURA_KEY;
@@ -56,6 +56,9 @@ module.exports = {
     }
   },
   etherscan: {
-    apiKey: ETHERSCAN_API_KEY
+    apiKey: SCAN_API_KEY
   },
+  polygonscan: {
+    apiKey: SCAN_API_KEY
+  }
 };

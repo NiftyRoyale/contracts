@@ -3,7 +3,7 @@ const { BattleRoyale } = require('./contracts');
 const {
   NFT_ADDRESS,
   ARENA_CONTRACT_ADDRESS,
-  ETHERSCAN_API_KEY,
+  SCAN_API_KEY,
   NETWORK,
   INFURA_KEY,
   ALCHEMY_KEY,
@@ -22,7 +22,7 @@ async function main() {
     let b = new BattleRoyale({
       address: address,
       mnemonic: MNEMONIC,
-      etherscanKey: ETHERSCAN_API_KEY,
+      scanKey: SCAN_API_KEY,
       owner: OWNER_ADDRESS,
       network: NETWORK,
       node: isInfura

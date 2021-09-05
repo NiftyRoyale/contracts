@@ -5,7 +5,7 @@ const {
 } = require('./contracts');
 const {
   NFT_ADDRESS,
-  ETHERSCAN_API_KEY,
+  SCAN_API_KEY,
   NETWORK,
   INFURA_KEY,
   ALCHEMY_KEY,
@@ -24,7 +24,7 @@ async function main() {
     const b = new BattleRoyaleArena({
       address: ARENA_CONTRACT_ADDRESS,
       mnemonic: MNEMONIC,
-      etherscanKey: ETHERSCAN_API_KEY,
+      scanKey: SCAN_API_KEY,
       owner: OWNER_ADDRESS,
       network: NETWORK,
       node: isInfura

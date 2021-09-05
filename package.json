@@ -17,6 +17,8 @@
     "deploy:rinkeby": "npx hardhat run migrations/hardhat.deploy.js --network rinkeby",
     "deploy:kovan": "npx hardhat run migrations/hardhat.deploy.js --network kovan",
     "deploy:mainnet": "npx hardhat run migrations/hardhat.deploy.js --network mainnet",
+    "deploy:matic": "npx hardhat run migrations/hardhat.deploy.js --network matic",
+    "deploy:mumbai": "npx hardhat run migrations/hardhat.deploy.js --network mumbai",
     "test": "npx truffle test",
     "mint": "node scripts/mint.js"
   },

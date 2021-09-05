@@ -1,7 +1,7 @@
 require('dotenv').config();
 const { ChainlinkRegistry } = require('./contracts');
 const {
-  ETHERSCAN_API_KEY,
+  SCAN_API_KEY,
   NETWORK,
   INFURA_KEY,
   ALCHEMY_KEY,
@@ -16,7 +16,7 @@ async function main() {
     const c = new ChainlinkRegistry({
       address: '0xAaaD7966EBE0663b8C9C6f683FB9c3e66E03467F',
       mnemonic: MNEMONIC,
-      etherscanKey: ETHERSCAN_API_KEY,
+      scanKey: SCAN_API_KEY,
       owner: OWNER_ADDRESS,
       network: NETWORK,
       node: isInfura

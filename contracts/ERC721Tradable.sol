@@ -35,20 +35,6 @@ contract ERC721Tradable is ERC721, Ownable {
     require(amount <= balance);
     msg.sender.transfer(amount);
   }
-  /**
-   * Set Name
-   * @param {String} name to be update on contract
-   */
-  function setName(string memory name_) external payable onlyOwner {
-    _name = name_;
-  }
-  /**
-   * Set Symbol
-   * @param {String} Symbol to be updated on contract
-   */
-  function setSymbol(string memory symbol_) external payable onlyOwner {
-    _symbol = symbol_;
-  }
   /*
    * Get Current ETH Balance from contract
    */
