@@ -25,5 +25,6 @@ module.exports = [
   5,
   50,
   false,
-  false
+  false,
+  ARENA_CONTRACT_ADDRESS
 ];
