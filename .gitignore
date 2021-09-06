@@ -7,4 +7,6 @@ cache/
 .env.rinkeby
 .env.kovan
 .env.mainnet
+.env.polygon-matic
+.env.polygon-mumbai
 *.DS_Store
