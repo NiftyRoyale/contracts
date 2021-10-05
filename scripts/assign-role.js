@@ -34,14 +34,7 @@ async function main() {
 
     console.log(`Granting access`);
 
-    const addresses = [
-      '0x4Cb093f226983713164A62138C3F718A5b595F73'
-    ];
-
-    // Aaron: '0x85Df0EFEd48Bb24Cd54E339F67706b76132f651C',
-    // Karen: '0x7243508B98bdB260ad825b60976dBDb2e8115771'
-    // Tim: '0xb21D08FbAAb4a1BFd2e3a01d3Dc8eB62bb159a54'
-    // Sam: '0xD6FdABaA5E01D9C579E0dE5e96aB62B888cd0f18'
+    const addresses = [];
 
     for (let a of addresses) {
       console.log(`granting access to: ${a}`);

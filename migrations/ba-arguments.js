@@ -16,14 +16,14 @@ const { ARENA_CONTRACT_ADDRESS } = process.env;
  * bool _autoPayout
  * address payable _arenaContract
  */
-const price = 0.0001 * 10**18;
+const price = 0.15 * 10**18;
 
 module.exports = [
-  `Nifty Royale X Eoin Three Doorways`,
-  `NRETD`,
+  `Nifty Royale X EJ Hassenfratz: King Kani's Tiny Kingdom`,
+  `NREJHKKTK`,
   `${price}`,
-  8,
-  8,
+  5,
+  30,
   false,
   false,
   ARENA_CONTRACT_ADDRESS
