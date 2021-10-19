@@ -28,7 +28,7 @@ const main = async () => {
     // const brf = await BattleRoyaleFactory.deploy();
     // console.log(`BattleRoyaleFactory deployed to ${brf.address}`);
     
-    if (ARENA_CONTRACT_ADDRESS !== "") {
+    if (ARENA_CONTRACT_ADDRESS === "") {
       const BattleRoyaleArena = await ethers.getContractFactory("BattleRoyaleArena");
       const arena = await BattleRoyaleArena.deploy(
         ...BRAArguments
