@@ -27,20 +27,23 @@ const main = async () => {
     // const BattleRoyaleFactory = await ethers.getContractFactory("BattleRoyaleFactory");
     // const brf = await BattleRoyaleFactory.deploy();
     // console.log(`BattleRoyaleFactory deployed to ${brf.address}`);
-
-    // const BattleRoyaleArena = await ethers.getContractFactory("BattleRoyaleArena");
-    // const arena = await BattleRoyaleArena.deploy(
-    //   ...BRAArguments
-    // );
-    //
-    // await arena.deployed();
-    // console.log(`Arena deployed to ${arena.address}`);
+    
+    if (ARENA_CONTRACT_ADDRESS !== "") {
+      const BattleRoyaleArena = await ethers.getContractFactory("BattleRoyaleArena");
+      const arena = await BattleRoyaleArena.deploy(
+        ...BRAArguments
+      );
+      
+      await arena.deployed();
+      console.log(`Arena deployed to ${arena.address}`);
+      console.log('Add the arena address to env file');
+      process.exit(0);
+    }
 
     const BattleRoyale = await ethers.getContractFactory("BattleRoyale");
     const battleRoyale = await BattleRoyale.deploy(
       ...BRArguments
     );
-
     await battleRoyale.deployed();
     console.log(`NFT deployed to ${battleRoyale.address}`);
 
