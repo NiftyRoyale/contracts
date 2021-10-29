@@ -6,9 +6,16 @@ require('dotenv').config();
 
 let arguments;
 
+const {
+  NETWORK,
+  HARDHAT_NETWORK,
+} = process.env;
+
+const hardhatNetwork = HARDHAT_NETWORK || NETWORK;
+
 // if testnets then use the suffix based envs
-if (["kovan", "rinkeby"].includes(process.env.HARDHAT_NETWORK)) {
-  const network = process.env.HARDHAT_NETWORK.toUpperCase();
+if (["kovan", "rinkeby"].includes(hardhatNetwork)) {
+  const network = hardhatNetwork.toUpperCase();
   arguments = [
     process.env[`VRF_COORDINATOR_${network}`],
     process.env[`LINKTOKEN_${network}`],
